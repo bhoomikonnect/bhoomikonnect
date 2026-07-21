@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { absoluteUrl } from "@/lib/utils";
 import { siteConfig } from "@/lib/site";
-import type { Developer, Faq, Property } from "@/types/marketplace";
+import type { Developer, Faq, MarketplaceService, Material, Property } from "@/types/marketplace";
 
 type MetadataInput = {
   title: string;
@@ -191,5 +191,30 @@ export function faqSchema(faqs: Faq[]) {
         text: faq.answer
       }
     }))
+  };
+}
+
+export function serviceSchema(service: MarketplaceService) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.title,
+    description: service.description,
+    image: absoluteUrl(service.image),
+    provider: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
+    areaServed: service.serviceLocations.map((name) => ({ "@type": "City", name })),
+    offers: { "@type": "Offer", price: service.startingPrice, priceCurrency: "INR", url: absoluteUrl(`/${service.family}/${service.slug}`) }
+  };
+}
+
+export function materialSchema(material: Material) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: material.name,
+    image: absoluteUrl(material.image),
+    description: material.description,
+    brand: { "@type": "Brand", name: material.brand },
+    offers: { "@type": "Offer", price: material.price, priceCurrency: "INR", availability: "https://schema.org/InStock", url: absoluteUrl(`/materials/${material.slug}`) }
   };
 }

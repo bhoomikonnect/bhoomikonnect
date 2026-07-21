@@ -1,0 +1,9 @@
+import type { Metadata } from "next";
+import { ListingPage } from "@/components/sections/ListingPage";
+import { getCities, getProperties } from "@/lib/marketplace";
+import { createMetadata } from "@/lib/seo";
+const typeAliases: Record<string, string> = { plots: "Plot", apartments: "Flat", villas: "Villa", commercial: "Commercial", rentals: "Rent" };
+type Props = { params: { city: string; type: string } };
+export async function generateStaticParams() { const cities = await getCities(); return cities.flatMap((city) => ["plots", "apartments", "villas", "commercial"].map((type) => ({ city: city.slug, type }))); }
+export async function generateMetadata({ params }: Props): Promise<Metadata> { const city = (await getCities()).find((item) => item.slug === params.city); const type = params.type.replace(/-/g, " "); return createMetadata({ title: `${type.replace(/\b\w/g, (letter) => letter.toUpperCase())} in ${city?.name || params.city}`, description: `Explore verified ${type} in ${city?.name || params.city} with original local-market context and direct enquiry.`, path: `/properties/${params.city}/${params.type}` }); }
+export default async function CityTypePage({ params }: Props) { const [cities, all] = await Promise.all([getCities(), getProperties()]); const city = cities.find((item) => item.slug === params.city); const alias = typeAliases[params.type]; const properties = all.filter((property) => property.location.city === city?.name && (alias === "Rent" ? property.saleType === "Rent" : property.propertyType === alias)); return <ListingPage eyebrow="Local property search" title={`${params.type.replace(/-/g, " ")} in ${city?.name || params.city}`} description={`A focused city page for meaningful ${city?.name || params.city} inventory, pricing, approvals, and direct conversations. Thin pages are excluded when no verified inventory is available.`} properties={properties} />; }

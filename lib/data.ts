@@ -584,10 +584,22 @@ export const cities: City[] = [
     avgPrice: "₹28,600/sq.ft",
     activeListings: 79,
     growth: "+7.9%"
+  },
+  {
+    name: "Vijayawada",
+    slug: "vijayawada",
+    state: "Andhra Pradesh",
+    microMarkets: ["Gannavaram", "Poranki", "Tadepalli", "Mangalagiri"],
+    avgPrice: "₹5,450/sq.ft",
+    activeListings: 64,
+    growth: "+12.1%"
   }
 ];
 
-export const propertyTypes: PropertyType[] = ["Plot", "Flat", "Villa", "Commercial"];
+export const propertyTypes: PropertyType[] = [
+  "Plot", "Agricultural Land", "Farm Land", "Flat", "Villa", "Independent House",
+  "Commercial", "Office", "Shop", "Warehouse", "Industrial"
+];
 
 export const homeFaqs: Faq[] = [
   {

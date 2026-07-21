@@ -12,11 +12,16 @@ import {
   SearchCheck,
   Settings,
   ShieldCheck,
-  Users
+  Users,
+  Plus,
+  FileText
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { adminMetrics, properties } from "@/lib/data";
+import { AdminFieldExplorer } from "@/components/admin/AdminFieldExplorer";
+import { LocalAdminLogout } from "@/components/auth/LocalAdminLogout";
+import { adminMetrics } from "@/lib/data";
+import { getProperties } from "@/lib/marketplace";
 import { createMetadata } from "@/lib/seo";
 import { formatPrice } from "@/lib/utils";
 
@@ -27,20 +32,24 @@ export const metadata: Metadata = createMetadata({
   noIndex: true
 });
 
-const modules = [
-  { label: "Properties", icon: Building2, count: "1,248" },
-  { label: "Developers", icon: ShieldCheck, count: "86" },
-  { label: "Users", icon: Users, count: "18.4K" },
-  { label: "Leads", icon: MessageSquare, count: "312" },
-  { label: "Cities", icon: LayoutDashboard, count: "42" },
-  { label: "Amenities", icon: CheckCircle2, count: "68" },
-  { label: "Media", icon: FileImage, count: "9.6K" },
-  { label: "SEO", icon: SearchCheck, count: "94%" },
-  { label: "Analytics", icon: BarChart3, count: "Live" },
-  { label: "Settings", icon: Settings, count: "RBAC" }
+const moduleLabels = [
+  "Properties", "Property Categories", "Property Types", "Projects", "Developers", "Property Owners",
+  "Sell Property Requests", "Property Leads", "Site Visits", "Construction Services", "Architecture Services",
+  "Interior Services", "Painting Services", "Renovation Services", "Maintenance Services", "Service Categories",
+  "Service Providers", "Service Bookings", "Service Leads", "Current Works", "Work Gallery", "Materials",
+  "Material Suppliers", "Material Enquiries", "Users", "Cities", "Districts", "Areas", "Localities", "Amenities",
+  "Approvals", "Testimonials", "Reviews", "FAQs", "Media Library", "Homepage Sections", "Pages", "Navigation",
+  "Footer", "Calculator Settings", "SEO Settings", "Contact Settings", "Social Media", "Site Settings", "User Roles",
+  "Notifications", "Audit Logs"
 ];
+const moduleIcons = [Building2, ShieldCheck, MessageSquare, Users, FileImage, SearchCheck, BarChart3, Settings, LayoutDashboard, CheckCircle2];
+const modules = moduleLabels.map((label, index) => ({ label, icon: moduleIcons[index % moduleIcons.length], count: index < 9 ? String(8 + index * 7) : "Manage" }));
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const properties = await getProperties();
+  const cmsUrl = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL;
+  const localAdminEnabled = process.env.NODE_ENV !== "production" && !process.env.NEXT_PUBLIC_SUPABASE_URL && Boolean(process.env.LOCAL_ADMIN_SESSION_SECRET);
+
   return (
     <>
       <section className="border-b bg-slate-950 py-8 text-white">
@@ -54,14 +63,18 @@ export default function AdminPage() {
               Manage properties, developers, users, leads, media, SEO, analytics, security, and platform settings.
             </p>
           </div>
-          <Link href="/buy" className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-950">
-            View marketplace
-          </Link>
+          <div className="flex flex-wrap gap-2"><Link href="/buy" className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-950">View marketplace</Link>{cmsUrl ? <Link href={cmsUrl} target="_blank" className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-slate-950">Open Directus CMS</Link> : null}{localAdminEnabled ? <LocalAdminLogout /> : null}</div>
         </div>
       </section>
 
       <section className="py-8">
         <div className="container grid gap-6">
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/properties/new" className="inline-flex min-h-10 items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"><Plus className="size-4" aria-hidden /> Add property</Link>
+            <Link href="/admin/pages/new" className="inline-flex min-h-10 items-center gap-2 rounded-md bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground"><FileText className="size-4" aria-hidden /> Add page</Link>
+            <Link href="/admin/properties" className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"><Building2 className="size-4" aria-hidden /> Manage properties</Link>
+            <Link href="/admin/pages" className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"><LayoutDashboard className="size-4" aria-hidden /> Manage pages</Link>
+          </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {adminMetrics.map((metric) => (
               <Card key={metric.label} className="p-5">
@@ -79,7 +92,7 @@ export default function AdminPage() {
               <h2 className="flex items-center gap-2 text-lg font-bold">
                 <LayoutDashboard className="size-5 text-primary" aria-hidden /> Modules
               </h2>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="mt-5 grid max-h-[620px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
                 {modules.map((module) => (
                   <div key={module.label} className="flex items-center justify-between gap-3 rounded-md bg-muted p-3">
                     <span className="flex items-center gap-2 text-sm font-semibold">
@@ -156,6 +169,8 @@ export default function AdminPage() {
               </div>
             </Card>
           </div>
+
+          <div id="fields" className="scroll-mt-24"><AdminFieldExplorer /></div>
         </div>
       </section>
     </>

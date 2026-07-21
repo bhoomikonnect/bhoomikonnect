@@ -4,7 +4,7 @@ import { ArrowRight, Map, MapPin, TrendingUp } from "lucide-react";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { cities, properties } from "@/lib/data";
+import { getCities, getProperties } from "@/lib/marketplace";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
@@ -15,7 +15,9 @@ export const metadata: Metadata = createMetadata({
   keywords: ["real estate cities", "property micro markets", "city property search", "popular property cities"]
 });
 
-export default function CitiesPage() {
+export default async function CitiesPage() {
+  const [cities, properties] = await Promise.all([getCities(), getProperties()]);
+
   return (
     <>
       <section className="border-b bg-muted/50 py-10 sm:py-14">

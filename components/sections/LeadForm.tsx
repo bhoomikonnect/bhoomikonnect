@@ -9,17 +9,52 @@ import { Textarea } from "@/components/ui/textarea";
 type LeadFormProps = {
   title?: string;
   source?: "Quick Enquiry" | "Request Callback" | "WhatsApp" | "Book Site Visit" | "Schedule Meeting";
+  propertySlug?: string;
+  developerSlug?: string;
 };
 
-export function LeadForm({ title = "Contact developer", source = "Quick Enquiry" }: LeadFormProps) {
-  const [submitted, setSubmitted] = useState(false);
+export function LeadForm({
+  title = "Contact developer",
+  source = "Quick Enquiry",
+  propertySlug,
+  developerSlug
+}: LeadFormProps) {
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
 
   return (
     <form
       className="rounded-lg border bg-card p-5 shadow-sm"
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
-        setSubmitted(true);
+
+        const form = event.currentTarget;
+        const formData = new FormData(form);
+
+        setStatus("loading");
+        setMessage("");
+
+        try {
+          const response = await fetch("/api/leads", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(Object.fromEntries(formData.entries()))
+          });
+          const result = (await response.json()) as { ok: boolean; message?: string };
+
+          if (!response.ok || !result.ok) {
+            throw new Error(result.message || "Unable to submit enquiry");
+          }
+
+          setStatus("success");
+          setMessage("Thanks. Your enquiry has been sent to the developer team.");
+          form.reset();
+        } catch (error) {
+          setStatus("error");
+          setMessage(error instanceof Error ? error.message : "Unable to submit enquiry");
+        }
       }}
     >
       <div className="flex items-center justify-between gap-3">
@@ -32,25 +67,31 @@ export function LeadForm({ title = "Contact developer", source = "Quick Enquiry"
         <Input name="phone" placeholder="Phone number" required inputMode="tel" />
         <Input name="email" placeholder="Email address" type="email" />
         <Textarea name="message" placeholder="I am interested in this property" />
+        <label className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><input type="checkbox" name="consent" value="true" defaultChecked className="mt-1 accent-primary" />I consent to BhoomiKonnect contacting me about this request.</label>
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" className="sr-only" aria-hidden />
         <input type="hidden" name="source" value={source} />
+        {propertySlug ? <input type="hidden" name="propertySlug" value={propertySlug} /> : null}
+        {developerSlug ? <input type="hidden" name="developerSlug" value={developerSlug} /> : null}
       </div>
 
-      {submitted ? (
-        <p className="mt-4 rounded-md bg-secondary/10 p-3 text-sm font-semibold text-secondary">
-          Thanks. Your enquiry is ready for Supabase lead capture.
+      {status !== "idle" ? (
+        <p className={`mt-4 rounded-md p-3 text-sm font-semibold ${
+          status === "error" ? "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-100" : "bg-secondary/10 text-secondary"
+        }`}>
+          {status === "loading" ? "Sending enquiry..." : message}
         </p>
       ) : null}
 
       <div className="mt-5 grid grid-cols-2 gap-2">
-        <Button type="submit" className="col-span-2">
+        <Button type="submit" className="col-span-2" disabled={status === "loading"}>
           <Send className="size-4" aria-hidden /> Send enquiry
         </Button>
-        <Button type="button" variant="outline">
+        <a href="tel:+919000000000" className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md border bg-background px-3 text-sm font-semibold">
           <PhoneCall className="size-4" aria-hidden /> Call
-        </Button>
-        <Button type="button" variant="secondary">
+        </a>
+        <a href="https://wa.me/919000000000" className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-secondary px-3 text-sm font-semibold text-white">
           <MessageCircle className="size-4" aria-hidden /> WhatsApp
-        </Button>
+        </a>
         <Button type="button" variant="accent" className="col-span-2">
           <CalendarCheck className="size-4" aria-hidden /> Book site visit
         </Button>

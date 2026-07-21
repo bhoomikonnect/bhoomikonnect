@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { navItems } from "@/lib/site";
+import { navItems, serviceNavItems } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +28,7 @@ export function MobileNav() {
       {open ? (
         <div className="absolute inset-x-4 top-20 z-50 rounded-lg border bg-background p-3 shadow-panel">
           <nav className="grid grid-cols-2 gap-1" aria-label="Mobile navigation">
-            {navItems.map((item) => (
+            {[...navItems, ...serviceNavItems].map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -51,9 +51,19 @@ export function MobileNav() {
             <Link
               href="/register"
               onClick={() => setOpen(false)}
-              className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white"
+              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               Register
+            </Link>
+            <Link
+              href="/post-property"
+              onClick={() => setOpen(false)}
+              className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white"
+            >
+              Post Property
+            </Link>
+            <Link href="/contact?type=free-quote" onClick={() => setOpen(false)} className="col-span-2 rounded-md bg-primary px-3 py-2 text-center text-sm font-semibold text-white">
+              Get Free Quote
             </Link>
           </nav>
         </div>

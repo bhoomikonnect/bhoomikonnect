@@ -6,6 +6,8 @@ import {
   BadgeCheck,
   BarChart3,
   Building2,
+  DraftingCompass,
+  Hammer,
   CheckCircle2,
   CircleDollarSign,
   Compass,
@@ -14,11 +16,16 @@ import {
   Landmark,
   Layers3,
   MapPin,
+  Paintbrush,
+  PackageOpen,
   ShieldCheck,
   Sparkles,
   TrendingUp,
-  Users
+  Users,
+  Wrench
 } from "lucide-react";
+import { PropertyCalculators } from "@/components/calculators/PropertyCalculators";
+import { QuoteForm } from "@/components/forms/QuoteForm";
 import { JsonLd } from "@/components/JsonLd";
 import { Reveal } from "@/components/Reveal";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
@@ -31,14 +38,16 @@ import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { cities, developers, homeFaqs, properties } from "@/lib/data";
+import { platformFaqs, serviceFamilyMeta, testimonials } from "@/lib/catalog";
+import { getCurrentWorks, getServices } from "@/lib/content";
+import { getCities, getDevelopers, getProperties } from "@/lib/marketplace";
 import { createMetadata, faqSchema } from "@/lib/seo";
 import { cn, formatNumber } from "@/lib/utils";
 
 export const metadata: Metadata = createMetadata({
-  title: "BhoomiKonnect | Verified Developer Property Marketplace",
+  title: "BhoomiKonnect | Property, Construction and Home Services",
   description:
-    "Search verified flats, plots, villas, commercial spaces, projects, developers, and cities with direct developer enquiry on BhoomiKonnect.",
+    "Buy, sell, build, design, renovate, maintain, and source construction materials through verified BhoomiKonnect professionals.",
   path: "/",
   keywords: ["real estate marketplace", "verified developers", "RERA properties", "buy property India"]
 });
@@ -93,26 +102,19 @@ const whyItems = [
   }
 ];
 
-const testimonials = [
-  {
-    name: "Riya Menon",
-    role: "Buyer, Hyderabad",
-    quote: "The developer profile and approval details helped us shortlist projects without calling five different brokers."
-  },
-  {
-    name: "Arjun Sethi",
-    role: "Investor, Pune",
-    quote: "The comparison view made plotted layouts and commercial suites easier to evaluate side by side."
-  },
-  {
-    name: "Meera Kulkarni",
-    role: "Developer CRM Head",
-    quote: "Lead quality improves when buyers already understand the project, price, possession, and location context."
-  }
-];
+const serviceFamilies = [
+  { family: "construction", href: "/construction", icon: Hammer },
+  { family: "architecture", href: "/architecture", icon: DraftingCompass },
+  { family: "interiors", href: "/interiors", icon: Home },
+  { family: "painting", href: "/painting", icon: Paintbrush },
+  { family: "renovation", href: "/renovation", icon: Building2 },
+  { family: "maintenance", href: "/maintenance", icon: Wrench },
+  { family: "materials", href: "/materials", icon: PackageOpen }
+] as const;
 
-export default function HomePage() {
-  const featuredProperties = properties.filter((property) => property.featuredProperty);
+export default async function HomePage() {
+  const [properties, cities, developers, services, works] = await Promise.all([getProperties(), getCities(), getDevelopers(), getServices(), getCurrentWorks()]);
+  const featuredProperties = properties.filter((property) => property.featuredProperty).slice(0, 6);
   const latestProjects = properties.slice(0, 4);
 
   return (
@@ -129,42 +131,48 @@ export default function HomePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-white via-white/86 to-white/34 dark:from-slate-950 dark:via-slate-950/86 dark:to-slate-950/35" />
         </div>
-        <div className="container relative grid min-h-[calc(100svh-4rem)] content-center gap-10 py-12 lg:grid-cols-[0.95fr_0.72fr] lg:items-center">
-          <div>
+        <div className="container relative grid min-h-[calc(100svh-7rem)] content-center gap-10 py-8 sm:py-12 lg:grid-cols-[1.08fr_0.62fr] lg:items-center">
+          <div className="min-w-0">
             <Reveal>
               <Badge variant="accent">
-                <BadgeCheck className="size-3" aria-hidden /> Verified developer marketplace
+                <BadgeCheck className="size-3" aria-hidden /> BhoomiKonnect verified marketplace
               </Badge>
-              <h1 className="mt-5 max-w-4xl text-balance text-5xl font-bold tracking-normal text-slate-950 dark:text-white sm:text-6xl lg:text-7xl">
-                BhoomiKonnect
+              <h1 className="mt-4 max-w-4xl text-balance text-3xl font-bold tracking-normal text-slate-950 dark:text-white sm:mt-5 sm:text-5xl lg:text-6xl">
+                From Land to Dream Home — Everything Under One Roof
               </h1>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-700 dark:text-slate-200">
-                Connecting buyers with trusted developers through verified projects, transparent property data, and direct conversations.
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-700 dark:text-slate-200 sm:mt-5 sm:text-lg sm:leading-8">
+                Discover verified properties, trusted developers, construction solutions, interiors, renovation, and complete home services through BhoomiKonnect.
               </p>
             </Reveal>
 
-            <Reveal delay={0.1} className="mt-8">
+            <Reveal delay={0.1} className="mt-4 sm:mt-8">
               <SearchPanel />
             </Reveal>
 
-            <Reveal delay={0.18} className="mt-6 flex flex-wrap items-center gap-3">
+            <Reveal delay={0.18} className="mt-4 flex flex-wrap items-center gap-3 sm:mt-6">
               <Link href="/buy" className={cn(buttonVariants({ size: "lg" }))}>
-                Explore properties <ArrowRight className="size-4" aria-hidden />
+                Buy Property <ArrowRight className="size-4" aria-hidden />
               </Link>
-              <Link href="/developers" className={cn(buttonVariants({ variant: "outline", size: "lg" }))}>
-                View developers
+              <Link href="/sell-property" className={cn(buttonVariants({ variant: "outline", size: "lg" }))}>
+                Sell Property
+              </Link>
+              <Link href="/construction#quote" className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "hidden sm:inline-flex")}>
+                Construction Quote
+              </Link>
+              <Link href="/contact" className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "hidden sm:inline-flex")}>
+                Contact Us
               </Link>
             </Reveal>
           </div>
 
-          <Reveal delay={0.14}>
+          <Reveal delay={0.14} className="hidden lg:block">
             <div className="grid gap-4 rounded-lg border bg-background/88 p-4 shadow-panel backdrop-blur-xl">
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: "Verified listings", value: "1,200+", icon: CheckCircle2 },
-                  { label: "Developer partners", value: "80+", icon: Users },
-                  { label: "Growth cities", value: "12", icon: MapPin },
-                  { label: "Avg. response", value: "< 30m", icon: TrendingUp }
+                  { label: "Demo listings", value: `${properties.length}`, icon: CheckCircle2 },
+                  { label: "Service scopes", value: `${services.length}+`, icon: Users },
+                  { label: "Launch cities", value: `${cities.length}`, icon: MapPin },
+                  { label: "Lead categories", value: "15", icon: TrendingUp }
                 ].map((stat) => (
                   <div key={stat.label} className="rounded-md bg-muted p-4">
                     <stat.icon className="size-5 text-primary" aria-hidden />
@@ -181,7 +189,7 @@ export default function HomePage() {
                   <div className="h-2 w-[92%] rounded-full bg-accent" />
                 </div>
                 <p className="mt-3 text-sm text-slate-300">
-                  Listings are scored across approval completeness, developer verification, response ownership, and property data depth.
+                  Properties, professionals, suppliers, and service scopes carry their own verification and review context.
                 </p>
               </div>
             </div>
@@ -221,6 +229,18 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="border-y bg-muted/55 py-10 sm:py-14">
+        <div className="container">
+          <SectionHeading eyebrow="Everything under one roof" title="Move from property search to finished home without losing context." description="Each service family has its own CMS-ready pages, packages, local coverage, provider matching, and lead workflow." />
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {serviceFamilies.map((item) => {
+              const meta = item.family === "materials" ? { title: "Materials Supply", description: "Cement, steel, finishes, hardware, and site delivery quotations." } : serviceFamilyMeta[item.family];
+              return <Link key={item.href} href={item.href} className="group rounded-lg border bg-card p-5 transition hover:-translate-y-1 hover:shadow-lift"><span className="grid size-11 place-items-center rounded-md bg-primary/10 text-primary"><item.icon className="size-5" aria-hidden /></span><h3 className="mt-4 text-lg font-bold">{meta.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{meta.description}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">Explore <ArrowRight className="size-4 transition group-hover:translate-x-1" aria-hidden /></span></Link>;
+            })}
+          </div>
+        </div>
+      </section>
+
       <section className="bg-muted/55 py-10 sm:py-14">
         <div className="container">
           <SectionHeading
@@ -245,6 +265,13 @@ export default function HomePage() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="py-10 sm:py-14">
+        <div className="container">
+          <SectionHeading eyebrow="Current works" title="Visible progress builds confidence." description="Follow ongoing and completed construction, interior, painting, and renovation work through milestone-ready pages." />
+          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">{works.slice(0, 4).map((work) => <Link key={work.id} href={`/current-works/${work.slug}`} className="overflow-hidden rounded-lg border bg-card"><div className="relative aspect-[16/10]"><Image src={work.image} alt={`${work.title} current work`} fill className="object-cover" /></div><div className="p-4"><p className="text-xs font-bold uppercase text-primary">{work.category} · {work.status}</p><h3 className="mt-2 font-bold">{work.title}</h3><div className="mt-4 h-2 rounded-full bg-muted"><div className="h-2 rounded-full bg-secondary" style={{ width: `${work.progress}%` }} /></div><p className="mt-2 text-xs text-muted-foreground">{work.progress}% complete</p></div></Link>)}</div>
         </div>
       </section>
 
@@ -333,6 +360,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="py-10 sm:py-14"><div className="container"><SectionHeading eyebrow="Planning calculators" title="Estimate before you enquire." description="Explore home-loan EMI, construction cost, and common Indian property area conversions." /><div className="mt-8"><PropertyCalculators /></div></div></section>
+
       <section className="py-10 sm:py-14">
         <div className="container">
           <SectionHeading
@@ -363,7 +392,7 @@ export default function HomePage() {
             title="Designed for people who want confidence before commitment."
           />
           <div className="grid gap-4 md:grid-cols-3">
-            {testimonials.map((testimonial) => (
+            {testimonials.slice(0, 6).map((testimonial) => (
               <Card key={testimonial.name} className="p-5">
                 <CircleDollarSign className="size-6 text-primary" aria-hidden />
                 <p className="mt-4 text-sm leading-6 text-muted-foreground">&quot;{testimonial.quote}&quot;</p>
@@ -377,13 +406,15 @@ export default function HomePage() {
 
       <section className="py-10 sm:py-14">
         <div className="container grid gap-8 lg:grid-cols-[0.76fr_1.24fr]">
-          <SectionHeading eyebrow="FAQ" title="Answers for buyers and developers." />
-          <FaqList faqs={homeFaqs} />
+          <SectionHeading eyebrow="FAQ" title="Answers for buyers, owners, and service customers." />
+          <FaqList faqs={platformFaqs} />
         </div>
       </section>
 
+      <section className="border-t bg-muted/45 py-10 sm:py-14"><div className="container grid gap-8 lg:grid-cols-[0.78fr_1.22fr]"><SectionHeading eyebrow="One enquiry, the right workflow" title="Tell us where your property journey stands." description="Buying, selling, construction, interiors, painting, renovation, maintenance, and material requests are classified and sent to the appropriate admin queue." /><QuoteForm title="How can BhoomiKonnect help?" leadType="General Contact" source="Homepage" /></div></section>
+
       <Newsletter />
-      <JsonLd data={faqSchema(homeFaqs)} />
+      <JsonLd data={faqSchema(platformFaqs)} />
     </>
   );
 }

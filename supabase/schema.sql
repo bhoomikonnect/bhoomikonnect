@@ -1,6 +1,6 @@
 create extension if not exists "uuid-ossp";
 
-create type user_role as enum ('guest', 'buyer', 'developer', 'administrator');
+create type user_role as enum ('guest', 'customer', 'buyer', 'property_owner', 'developer', 'contractor', 'architect', 'interior_designer', 'service_provider', 'material_supplier', 'administrator', 'admin', 'super_admin');
 create type lead_status as enum ('new', 'contacted', 'site_visit', 'negotiation', 'closed', 'lost');
 
 create table public.profiles (
@@ -16,10 +16,22 @@ create table public.developers (
   name text not null,
   slug text not null unique,
   profile text not null,
+  logo_initials text,
   logo_url text,
   website text,
   phone text,
   email text,
+  completed_projects integer not null default 0,
+  ongoing_projects integer not null default 0,
+  upcoming_projects integer not null default 0,
+  rating numeric not null default 4.5,
+  reviews integer not null default 0,
+  established text,
+  headquarters text,
+  specialties text[] default '{}',
+  linkedin text,
+  instagram text,
+  youtube text,
   verified boolean not null default false,
   active boolean not null default true,
   created_at timestamptz not null default now()
@@ -32,6 +44,7 @@ create table public.properties (
   property_type text not null,
   category text not null,
   developer_id uuid not null references public.developers(id),
+  developer_slug text,
   project_name text not null,
   property_status text not null,
   sale_rent text not null default 'Sale',
@@ -39,6 +52,10 @@ create table public.properties (
   price_per_sq_ft numeric,
   booking_amount numeric,
   area numeric not null,
+  area_unit text not null default 'sq.ft',
+  city text,
+  area_name text,
+  address text,
   facing text,
   bedrooms integer,
   bathrooms integer,
@@ -50,13 +67,14 @@ create table public.properties (
   possession_date date,
   amenities text[] default '{}',
   description text not null,
-  location text not null,
+  location text,
   latitude numeric,
   longitude numeric,
   gallery text[] default '{}',
   floor_plans text[] default '{}',
   video_url text,
   brochure_url text,
+  nearby jsonb default '[]',
   seo_title text,
   meta_description text,
   keywords text[] default '{}',
@@ -70,6 +88,8 @@ create table public.leads (
   id uuid primary key default uuid_generate_v4(),
   property_id uuid references public.properties(id),
   developer_id uuid references public.developers(id),
+  property_slug text,
+  developer_slug text,
   buyer_name text not null,
   phone text not null,
   email text,
@@ -180,3 +200,7 @@ create policy "Active property types are public"
 create policy "Buyers can create leads"
   on public.leads for insert
   with check (true);
+
+-- Continue with supabase/migrations/202607140001_marketplace_cms.sql for the
+-- complete services, providers, materials, works, CMS, dashboard, indexes,
+-- storage metadata, and role-based policy expansion.

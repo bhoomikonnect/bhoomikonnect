@@ -14,6 +14,10 @@ export function slugify(input: string) {
 }
 
 export function formatPrice(value: number) {
+  if (value < 100000) {
+    return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
+  }
+
   if (value >= 10000000) {
     return `₹${(value / 10000000).toFixed(value % 10000000 === 0 ? 0 : 2)} Cr`;
   }

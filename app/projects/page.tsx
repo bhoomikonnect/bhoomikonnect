@@ -5,7 +5,7 @@ import { PropertyCard } from "@/components/sections/PropertyCard";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { properties } from "@/lib/data";
+import { getProperties } from "@/lib/marketplace";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
@@ -34,7 +34,9 @@ const statusCards = [
   }
 ];
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const properties = await getProperties();
+
   return (
     <>
       <section className="border-b bg-muted/50 py-10 sm:py-14">

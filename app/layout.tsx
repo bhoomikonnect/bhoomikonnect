@@ -4,6 +4,7 @@ import "./globals.css";
 import { JsonLd } from "@/components/JsonLd";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { FloatingActions } from "@/components/layout/FloatingActions";
 import { organizationSchema, websiteSchema } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0F766E",
+  themeColor: "#0B5D4B",
   colorScheme: "light dark"
 };
 
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <SiteHeader />
         <main id="content">{children}</main>
         <SiteFooter />
+        <FloatingActions />
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
       </body>
     </html>

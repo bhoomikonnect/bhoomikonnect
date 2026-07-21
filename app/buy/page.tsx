@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ListingPage } from "@/components/sections/ListingPage";
-import { properties } from "@/lib/data";
+import { getProperties } from "@/lib/marketplace";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
@@ -11,7 +11,9 @@ export const metadata: Metadata = createMetadata({
   keywords: ["buy property", "verified properties", "developer properties", "RERA property"]
 });
 
-export default function BuyPage() {
+export default async function BuyPage() {
+  const properties = await getProperties();
+
   return (
     <ListingPage
       eyebrow="Buy property"

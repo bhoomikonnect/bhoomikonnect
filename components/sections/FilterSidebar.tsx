@@ -1,8 +1,11 @@
 import { BadgeCheck, BedDouble, CalendarClock, Home, MapPinned, Ruler, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { amenities, cities, developers, propertyTypes } from "@/lib/data";
+import { amenities, propertyTypes } from "@/lib/data";
+import { getCities, getDevelopers } from "@/lib/marketplace";
 
-export function FilterSidebar() {
+export async function FilterSidebar() {
+  const [cities, developers] = await Promise.all([getCities(), getDevelopers()]);
+
   return (
     <aside className="rounded-lg border bg-card p-4 shadow-sm lg:sticky lg:top-24">
       <div className="flex items-center justify-between gap-3">

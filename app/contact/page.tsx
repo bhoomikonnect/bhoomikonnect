@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
-import { LeadForm } from "@/components/sections/LeadForm";
+import { QuoteForm } from "@/components/forms/QuoteForm";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Card } from "@/components/ui/card";
 import { createMetadata } from "@/lib/seo";
@@ -21,8 +21,8 @@ export default function ContactPage() {
         <div className="container">
           <SectionHeading
             eyebrow="Contact"
-            title="Talk to BhoomiKonnect about buying, listing, or partnerships."
-            description="Send an enquiry, request a callback, or connect with the onboarding team for verified developer listings."
+            title="Talk to BhoomiKonnect about property or home work."
+            description="Send a property, construction, architecture, interior, painting, renovation, maintenance, material, or partnership enquiry."
           />
         </div>
       </section>
@@ -49,7 +49,7 @@ export default function ContactPage() {
               </p>
             </Card>
           </div>
-          <LeadForm title="Send a message" source="Schedule Meeting" />
+          <QuoteForm title="Send an enquiry" leadType="General Contact" source="Contact Page" />
         </div>
       </section>
     </>

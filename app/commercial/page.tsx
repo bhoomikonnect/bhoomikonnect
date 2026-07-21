@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ListingPage } from "@/components/sections/ListingPage";
-import { getPropertiesByType } from "@/lib/data";
+import { getPropertiesByType } from "@/lib/marketplace";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
@@ -11,13 +11,15 @@ export const metadata: Metadata = createMetadata({
   keywords: ["commercial property", "office space", "retail space", "business park"]
 });
 
-export default function CommercialPage() {
+export default async function CommercialPage() {
+  const properties = await getPropertiesByType("Commercial");
+
   return (
     <ListingPage
       eyebrow="Commercial"
       title="Commercial spaces for owner-occupiers and investors."
       description="Search office, retail, and business park inventory with frontage, parking, approvals, and tenant-friendly location signals."
-      properties={getPropertiesByType("Commercial")}
+      properties={properties}
     />
   );
 }

@@ -3,7 +3,7 @@ import { Award, BadgeCheck, Building2, Users } from "lucide-react";
 import { DeveloperCard } from "@/components/sections/DeveloperCard";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Card } from "@/components/ui/card";
-import { developers } from "@/lib/data";
+import { getDevelopers } from "@/lib/marketplace";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
@@ -14,7 +14,9 @@ export const metadata: Metadata = createMetadata({
   keywords: ["verified developers", "real estate developers", "builder profiles", "developer projects"]
 });
 
-export default function DevelopersPage() {
+export default async function DevelopersPage() {
+  const developers = await getDevelopers();
+
   return (
     <>
       <section className="border-b bg-muted/50 py-10 sm:py-14">

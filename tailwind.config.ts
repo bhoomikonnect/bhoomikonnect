@@ -23,15 +23,15 @@ const config: Config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#0F766E",
+          DEFAULT: "#0B5D4B",
           foreground: "#FFFFFF"
         },
         secondary: {
-          DEFAULT: "#16A34A",
+          DEFAULT: "#118C5A",
           foreground: "#FFFFFF"
         },
         accent: {
-          DEFAULT: "#F59E0B",
+          DEFAULT: "#D8A62A",
           foreground: "#1F2937"
         },
         muted: {
@@ -44,7 +44,7 @@ const config: Config = {
         }
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "Inter", "ui-sans-serif", "system-ui", "sans-serif"]
+        sans: ["Inter", "Segoe UI", "ui-sans-serif", "system-ui", "sans-serif"]
       },
       borderRadius: {
         lg: "0.5rem",
@@ -53,7 +53,7 @@ const config: Config = {
       },
       boxShadow: {
         panel: "0 18px 45px rgba(15, 23, 42, 0.10)",
-        lift: "0 18px 60px rgba(15, 118, 110, 0.16)"
+        lift: "0 18px 60px rgba(11, 93, 75, 0.16)"
       }
     }
   },

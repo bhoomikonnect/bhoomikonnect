@@ -26,7 +26,7 @@ const pillars = [
   {
     title: "Scalable data model",
     icon: Database,
-    copy: "Properties, developers, leads, cities, amenities, media, and SEO fields map cleanly to Supabase and PostgreSQL."
+    copy: "Properties, projects, services, providers, works, materials, leads, media, and SEO map cleanly to Supabase and Directus."
   },
   {
     title: "Performance discipline",
@@ -52,8 +52,8 @@ export default function AboutPage() {
         <div className="container">
           <SectionHeading
             eyebrow="About"
-            title="BhoomiKonnect is built for cleaner real estate decisions."
-            description="The platform focuses on the most important trust exchange in property buying: verified developers presenting complete, searchable project information directly to serious buyers."
+            title="BhoomiKonnect connects every stage of the property journey."
+            description="Our mission is to make buying, selling, building, designing, renovating, maintaining, and sourcing property work easier to understand and safer to coordinate."
           />
         </div>
       </section>
@@ -76,12 +76,12 @@ export default function AboutPage() {
         <div className="container grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
           <SectionHeading
             eyebrow="Operating model"
-            title="Buyer confidence grows when every project has the same high-quality surface."
-            description="BhoomiKonnect standardizes property details, developer context, lead capture, media, maps, SEO fields, and admin workflows into one marketplace system."
+            title="Customer confidence grows when every handoff keeps its context."
+            description="BhoomiKonnect standardizes property details, service scopes, provider profiles, quotations, progress visibility, lead capture, media, and admin review into one operating system."
             className="[&_*]:text-white [&_p]:text-slate-300"
           />
           <div className="grid gap-3 sm:grid-cols-2">
-            {["Property verification", "Developer onboarding", "Lead routing", "SEO governance"].map((step, index) => (
+            {["Property verification", "Professional onboarding", "Lead and quote routing", "Progress visibility"].map((step, index) => (
               <div key={step} className="rounded-lg border border-white/10 bg-white/8 p-5">
                 <p className="text-sm font-semibold text-amber-200">0{index + 1}</p>
                 <h3 className="mt-3 text-lg font-bold">{step}</h3>

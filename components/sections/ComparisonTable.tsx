@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
-import { properties } from "@/lib/data";
+import { getProperties } from "@/lib/marketplace";
 import { formatPrice } from "@/lib/utils";
 
-export function ComparisonTable() {
+export async function ComparisonTable() {
+  const properties = await getProperties();
   const items = properties.slice(0, 3);
 
   return (

@@ -1,11 +1,18 @@
-import { ArrowRight, Building2, IndianRupee, MapPin, SlidersHorizontal } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Building2, IndianRupee, MapPin, Ruler, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cities, developers, propertyTypes } from "@/lib/data";
+import { propertyTypes } from "@/lib/data";
+import { getCities } from "@/lib/marketplace";
 
-export function SearchPanel() {
+export async function SearchPanel() {
+  const cities = await getCities();
+
   return (
-    <form action="/buy" className="rounded-lg border bg-background/94 p-3 shadow-panel backdrop-blur-xl">
-      <div className="grid gap-3 lg:grid-cols-[1.1fr_1fr_1fr_1fr_auto]">
+    <form action="/buy" className="min-w-0 rounded-lg border bg-background/94 p-3 shadow-panel backdrop-blur-xl">
+      <div className="mb-3 flex overflow-x-auto border-b" aria-label="Search modes">
+        {[{ label: "Buy", href: "/buy" }, { label: "Rent", href: "/rent" }, { label: "Projects", href: "/projects" }, { label: "Services", href: "/maintenance" }].map((tab, index) => <Link key={tab.href} href={tab.href} className={`min-w-20 flex-1 border-b-2 px-2 py-2 text-center text-xs font-semibold sm:min-w-24 sm:px-4 sm:text-sm ${index === 0 ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>{tab.label}</Link>)}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <label className="group flex min-h-14 items-center gap-3 rounded-md border bg-card px-3">
           <MapPin className="size-5 text-primary" aria-hidden />
           <span className="w-full">
@@ -36,7 +43,7 @@ export function SearchPanel() {
           </span>
         </label>
 
-        <label className="group flex min-h-14 items-center gap-3 rounded-md border bg-card px-3">
+        <label className="group hidden min-h-14 items-center gap-3 rounded-md border bg-card px-3 sm:flex">
           <IndianRupee className="size-5 text-primary" aria-hidden />
           <span className="w-full">
             <span className="block text-xs font-semibold text-muted-foreground">Budget</span>
@@ -50,17 +57,22 @@ export function SearchPanel() {
           </span>
         </label>
 
-        <label className="group flex min-h-14 items-center gap-3 rounded-md border bg-card px-3">
-          <SlidersHorizontal className="size-5 text-primary" aria-hidden />
+        <label className="group hidden min-h-14 items-center gap-3 rounded-md border bg-card px-3 sm:flex">
+          <Ruler className="size-5 text-primary" aria-hidden />
           <span className="w-full">
-            <span className="block text-xs font-semibold text-muted-foreground">Developer</span>
-            <select name="developer" className="w-full bg-transparent text-sm font-semibold outline-none">
-              <option value="">Any verified developer</option>
-              {developers.map((developer) => (
-                <option key={developer.slug} value={developer.slug}>
-                  {developer.name}
-                </option>
-              ))}
+            <span className="block text-xs font-semibold text-muted-foreground">Size</span>
+            <select name="area" className="w-full bg-transparent text-sm font-semibold outline-none">
+              <option value="">Any size</option><option value="0-1200">Below 1,200</option><option value="1200-2400">1,200 - 2,400</option><option value="2400+">2,400+ sq.ft</option>
+            </select>
+          </span>
+        </label>
+
+        <label className="group hidden min-h-14 items-center gap-3 rounded-md border bg-card px-3 sm:flex">
+          <ShieldCheck className="size-5 text-primary" aria-hidden />
+          <span className="w-full">
+            <span className="block text-xs font-semibold text-muted-foreground">Approval</span>
+            <select name="approval" className="w-full bg-transparent text-sm font-semibold outline-none">
+              <option value="">Any approval</option><option value="RERA">RERA</option><option value="DTCP">DTCP</option><option value="HMDA">HMDA</option><option value="Municipality">Municipality</option>
             </select>
           </span>
         </label>

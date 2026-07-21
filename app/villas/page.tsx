@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ListingPage } from "@/components/sections/ListingPage";
-import { getPropertiesByType } from "@/lib/data";
+import { getPropertiesByType } from "@/lib/marketplace";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
@@ -11,13 +11,15 @@ export const metadata: Metadata = createMetadata({
   keywords: ["villas for sale", "gated community villas", "premium villas", "verified villa developers"]
 });
 
-export default function VillasPage() {
+export default async function VillasPage() {
+  const properties = await getPropertiesByType("Villa");
+
   return (
     <ListingPage
       eyebrow="Villas"
       title="Low-density villa communities with verified developer backing."
       description="Evaluate villa layouts, private gardens, clubhouse amenities, possession timelines, and neighborhood context."
-      properties={getPropertiesByType("Villa")}
+      properties={properties}
     />
   );
 }

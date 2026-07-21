@@ -14,9 +14,13 @@ type MapPreviewProps = {
 };
 
 export function MapPreview({ property }: MapPreviewProps) {
+  const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const mapUrl = mapsKey
+    ? `https://www.google.com/maps/embed/v1/view?key=${encodeURIComponent(mapsKey)}&center=${property.location.latitude},${property.location.longitude}&zoom=14`
+    : "";
   return (
     <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
-      <div className="map-mesh relative min-h-[320px]">
+      {mapUrl ? <iframe title={`${property.title} map`} src={mapUrl} className="min-h-[320px] w-full border-0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen /> : <div className="map-mesh relative min-h-[320px]">
         <div className="absolute left-[56%] top-[46%] grid size-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-primary text-white shadow-lift">
           <MapPin className="size-7" aria-hidden />
         </div>
@@ -26,7 +30,7 @@ export function MapPreview({ property }: MapPreviewProps) {
             {property.location.latitude}, {property.location.longitude}
           </p>
         </div>
-      </div>
+      </div>}
       <div className="grid gap-3 p-4 sm:grid-cols-2">
         {property.nearby.map((place) => {
           const Icon = iconMap[place.type];

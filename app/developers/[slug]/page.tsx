@@ -7,7 +7,7 @@ import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { developers, getDeveloperBySlug, getPropertiesByDeveloper } from "@/lib/data";
+import { getDeveloperBySlug, getDevelopers, getPropertiesByDeveloper } from "@/lib/marketplace";
 import { breadcrumbSchema, createMetadata, developerSchema } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
@@ -17,14 +17,16 @@ type DeveloperPageProps = {
   };
 };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const developers = await getDevelopers();
+
   return developers.map((developer) => ({
     slug: developer.slug
   }));
 }
 
-export function generateMetadata({ params }: DeveloperPageProps): Metadata {
-  const developer = getDeveloperBySlug(params.slug);
+export async function generateMetadata({ params }: DeveloperPageProps): Promise<Metadata> {
+  const developer = await getDeveloperBySlug(params.slug);
 
   if (!developer) {
     return createMetadata({
@@ -43,14 +45,14 @@ export function generateMetadata({ params }: DeveloperPageProps): Metadata {
   });
 }
 
-export default function DeveloperProfilePage({ params }: DeveloperPageProps) {
-  const developer = getDeveloperBySlug(params.slug);
+export default async function DeveloperProfilePage({ params }: DeveloperPageProps) {
+  const developer = await getDeveloperBySlug(params.slug);
 
   if (!developer) {
     notFound();
   }
 
-  const developerProperties = getPropertiesByDeveloper(developer.slug);
+  const developerProperties = await getPropertiesByDeveloper(developer.slug);
 
   return (
     <>

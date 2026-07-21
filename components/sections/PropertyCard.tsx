@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, BadgeCheck, BedDouble, Building2, MapPin, Ruler, Star } from "lucide-react";
+import { PropertyActionButtons } from "@/components/properties/PropertyActionButtons";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
@@ -15,6 +16,7 @@ type PropertyCardProps = {
 
 export function PropertyCard({ property, compact = false }: PropertyCardProps) {
   const developer = getDeveloperBySlug(property.developerSlug);
+  const developerName = property.developerName || developer?.name || "Verified Developer";
 
   return (
     <Card className="group overflow-hidden transition hover:-translate-y-1 hover:shadow-lift">
@@ -35,6 +37,7 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
               </Badge>
             ) : null}
             <Badge variant="accent">{property.status}</Badge>
+            {property.featuredProperty ? <Badge variant="secondary">Featured</Badge> : null}
           </div>
           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
             <div className="rounded-md bg-white/92 px-3 py-2 text-slate-950 shadow-sm backdrop-blur">
@@ -79,12 +82,14 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
         </div>
 
         <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
-          <p className="text-sm text-muted-foreground">
-            by <span className="font-semibold text-foreground">{developer?.name}</span>
+          <p className="line-clamp-1 text-sm text-muted-foreground">
+            by <span className="font-semibold text-foreground">{developerName}</span>
           </p>
-          <Link href={`/property/${property.slug}`} className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-            View
-          </Link>
+          <span className="text-xs font-semibold text-primary">{property.approvals[0] || "Approval review"}</span>
+        </div>
+        <div className="mt-3 grid grid-cols-[auto_auto_auto_1fr] gap-2">
+          <PropertyActionButtons id={property.id} title={property.title} compact />
+          <Link href={`/property/${property.slug}`} className={cn(buttonVariants({ variant: "default", size: "sm" }))}>View Details</Link>
         </div>
       </div>
     </Card>

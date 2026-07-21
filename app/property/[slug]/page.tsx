@@ -4,21 +4,22 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   BadgeCheck,
-  Bookmark,
   CalendarClock,
   Download,
   FileText,
-  Heart,
   IndianRupee,
   MapPin,
+  MessageCircle,
   Maximize2,
   ParkingCircle,
   Share2,
   ShieldCheck,
   Star,
   Video
+  ,Phone
 } from "lucide-react";
 import { JsonLd } from "@/components/JsonLd";
+import { PropertyActionButtons } from "@/components/properties/PropertyActionButtons";
 import { FaqList } from "@/components/sections/FaqList";
 import { LeadForm } from "@/components/sections/LeadForm";
 import { MapPreview } from "@/components/sections/MapPreview";
@@ -27,7 +28,7 @@ import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { getDeveloperBySlug, getPropertyBySlug, getRelatedProperties, properties } from "@/lib/data";
+import { getDeveloperBySlug, getProperties, getPropertyBySlug, getRelatedProperties } from "@/lib/marketplace";
 import { breadcrumbSchema, createMetadata, faqSchema, propertySchema } from "@/lib/seo";
 import { cn, formatPrice } from "@/lib/utils";
 
@@ -37,14 +38,16 @@ type PropertyPageProps = {
   };
 };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const properties = await getProperties();
+
   return properties.map((property) => ({
     slug: property.slug
   }));
 }
 
-export function generateMetadata({ params }: PropertyPageProps): Metadata {
-  const property = getPropertyBySlug(params.slug);
+export async function generateMetadata({ params }: PropertyPageProps): Promise<Metadata> {
+  const property = await getPropertyBySlug(params.slug);
 
   if (!property) {
     return createMetadata({
@@ -64,15 +67,15 @@ export function generateMetadata({ params }: PropertyPageProps): Metadata {
   });
 }
 
-export default function PropertyDetailPage({ params }: PropertyPageProps) {
-  const property = getPropertyBySlug(params.slug);
+export default async function PropertyDetailPage({ params }: PropertyPageProps) {
+  const property = await getPropertyBySlug(params.slug);
 
   if (!property) {
     notFound();
   }
 
-  const developer = getDeveloperBySlug(property.developerSlug);
-  const related = getRelatedProperties(property);
+  const developer = await getDeveloperBySlug(property.developerSlug);
+  const related = await getRelatedProperties(property);
   const faqs = [
     {
       question: `Is ${property.projectName} RERA approved?`,
@@ -115,12 +118,7 @@ export default function PropertyDetailPage({ params }: PropertyPageProps) {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button className={cn(buttonVariants({ variant: "outline" }))} type="button">
-                <Heart className="size-4" aria-hidden /> Save
-              </button>
-              <button className={cn(buttonVariants({ variant: "outline" }))} type="button">
-                <Bookmark className="size-4" aria-hidden /> Compare
-              </button>
+              <PropertyActionButtons id={property.id} title={property.title} />
               <button className={cn(buttonVariants({ variant: "outline" }))} type="button">
                 <Share2 className="size-4" aria-hidden /> Share
               </button>
@@ -266,16 +264,26 @@ export default function PropertyDetailPage({ params }: PropertyPageProps) {
             ) : null}
           </div>
 
-          <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+          <aside id="property-enquiry" className="scroll-mt-24 space-y-4 lg:sticky lg:top-24 lg:self-start">
             <Card className="p-5">
               <p className="text-sm text-muted-foreground">Starting price</p>
               <p className="mt-1 text-3xl font-bold">{formatPrice(property.price)}</p>
               <p className="mt-2 text-sm text-muted-foreground">₹{property.pricePerSqFt.toLocaleString("en-IN")} per sq.ft · Booking {formatPrice(property.bookingAmount)}</p>
             </Card>
-            <LeadForm source="Book Site Visit" />
+            <LeadForm
+              source="Book Site Visit"
+              propertySlug={property.slug}
+              developerSlug={property.developerSlug}
+            />
           </aside>
         </div>
       </section>
+
+      <div className="mobile-sticky-actions sticky bottom-0 z-30 grid grid-cols-3 gap-2 border-t bg-background p-2 lg:hidden">
+        <a href="tel:+919000000000" className={cn(buttonVariants({ variant: "outline" }))}><Phone className="size-4" aria-hidden /> Call</a>
+        <a href={`https://wa.me/919000000000?text=${encodeURIComponent(`I am interested in ${property.title}`)}`} className={cn(buttonVariants({ variant: "secondary" }))}><MessageCircle className="size-4" aria-hidden /> WhatsApp</a>
+        <a href="#property-enquiry" className={cn(buttonVariants())}>Enquire</a>
+      </div>
 
       <JsonLd
         data={[

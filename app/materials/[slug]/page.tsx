@@ -1,0 +1,16 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { CheckCircle2, PackageCheck, Truck } from "lucide-react";
+import { JsonLd } from "@/components/JsonLd";
+import { QuoteForm } from "@/components/forms/QuoteForm";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { getMaterials } from "@/lib/content";
+import { breadcrumbSchema, createMetadata, materialSchema } from "@/lib/seo";
+import { formatPrice } from "@/lib/utils";
+type Props = { params: { slug: string } };
+export async function generateStaticParams() { return (await getMaterials()).map(({ slug }) => ({ slug })); }
+export async function generateMetadata({ params }: Props): Promise<Metadata> { const item = (await getMaterials()).find((value) => value.slug === params.slug); return createMetadata({ title: `${item?.name || "Material"} Supply Quote`, description: item?.description || "Request a construction material quote.", path: `/materials/${params.slug}`, image: item?.image }); }
+export default async function MaterialPage({ params }: Props) { const item = (await getMaterials()).find((value) => value.slug === params.slug); if (!item) notFound(); return <><section className="border-b bg-muted/50 py-8"><div className="container"><p className="text-sm text-muted-foreground"><Link href="/">Home</Link> / <Link href="/materials">Materials</Link> / {item.name}</p><Badge className="mt-5"><PackageCheck className="size-3" aria-hidden /> Supplier quotation</Badge><h1 className="mt-4 text-4xl font-bold sm:text-5xl">{item.name}</h1><p className="mt-3 max-w-2xl text-lg text-muted-foreground">{item.description}</p></div></section><section className="py-10"><div className="container grid gap-8 lg:grid-cols-[1fr_380px]"><div className="space-y-6"><div className="relative aspect-[16/9] overflow-hidden rounded-lg"><Image src={item.image} alt={`${item.name} construction material`} fill priority className="object-cover" /></div><div className="grid gap-4 sm:grid-cols-3"><Card className="p-4"><p className="text-xs text-muted-foreground">Indicative from</p><p className="mt-1 text-xl font-bold">{formatPrice(item.price)} / {item.unit}</p></Card><Card className="p-4"><p className="text-xs text-muted-foreground">Minimum order</p><p className="mt-1 font-bold">{item.minimumOrder}</p></Card><Card className="p-4"><Truck className="size-5 text-primary" aria-hidden /><p className="mt-2 font-bold">Delivery coordinated</p></Card></div><Card className="p-5"><h2 className="text-2xl font-bold">Supply specifications</h2><div className="mt-5 grid gap-3 sm:grid-cols-2">{item.specifications.map((spec) => <span key={spec} className="flex items-center gap-2 rounded-md bg-muted p-3 text-sm"><CheckCircle2 className="size-4 text-secondary" aria-hidden />{spec}</span>)}</div></Card></div><aside className="lg:sticky lg:top-24 lg:self-start"><QuoteForm title={`Quote for ${item.name}`} leadType="Material Quote" source={`${item.name} Material`} materialSlug={item.slug} compact /></aside></div></section><JsonLd data={[materialSchema(item), breadcrumbSchema([{ name: "Home", url: "/" }, { name: "Materials", url: "/materials" }, { name: item.name, url: `/materials/${item.slug}` }])]} /></>; }
