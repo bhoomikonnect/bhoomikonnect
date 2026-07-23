@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, FileText, LayoutDashboard, ListChecks } from "lucide-react";
+import { Building2, FileText, LayoutDashboard, ListChecks, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/properties", label: "Properties", icon: Building2 },
   { href: "/admin/pages", label: "Pages", icon: FileText },
+  { href: "/admin/leads", label: "Leads", icon: MessageSquare },
   { href: "/admin#fields", label: "Field reference", icon: ListChecks, exact: true }
 ];
 

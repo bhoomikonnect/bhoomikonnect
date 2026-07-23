@@ -19,12 +19,7 @@ const schema = z.object({
 });
 type Values = z.infer<typeof schema>;
 
-type LocalAdminCredentials = {
-  email: string;
-  password: string;
-};
-
-export function AuthForm({ mode, localAdminCredentials }: { mode: "login" | "register"; localAdminCredentials?: LocalAdminCredentials }) {
+export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -32,32 +27,15 @@ export function AuthForm({ mode, localAdminCredentials }: { mode: "login" | "reg
     resolver: zodResolver(schema),
     defaultValues: {
       role: "customer",
-      email: localAdminCredentials?.email || "",
-      password: localAdminCredentials?.password || ""
+      email: "",
+      password: ""
     }
   });
 
   async function submit(values: Values) {
     setError(""); setMessage("");
     const supabase = createClient();
-    if (!supabase) {
-      if (mode !== "login" || !localAdminCredentials) {
-        return setError("Supabase is not configured. Add the public URL and anon key to .env.local.");
-      }
-
-      const response = await fetch("/api/auth/local-admin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: values.email, password: values.password })
-      });
-      const result = await response.json().catch(() => ({ error: "Unable to start the local administrator session." }));
-      if (!response.ok) return setError(result.error || "Unable to sign in.");
-
-      const nextPath = new URLSearchParams(window.location.search).get("next");
-      router.push(nextPath?.startsWith("/") ? nextPath : result.redirectTo || "/admin");
-      router.refresh();
-      return;
-    }
+    if (!supabase) return setError("Authentication is unavailable. The site administrator must configure Supabase.");
     if (mode === "login") {
       const { error: authError } = await supabase.auth.signInWithPassword({ email: values.email, password: values.password });
       if (authError) return setError(authError.message);

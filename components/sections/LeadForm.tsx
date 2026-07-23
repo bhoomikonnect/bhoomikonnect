@@ -30,6 +30,15 @@ export function LeadForm({
 
         const form = event.currentTarget;
         const formData = new FormData(form);
+        const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+        const submittedSource = submitter?.value || source;
+        const leadType = submittedSource === "Book Site Visit"
+          ? "Site Visit"
+          : propertySlug
+            ? "Property Enquiry"
+            : developerSlug
+              ? "Developer Enquiry"
+              : "General Contact";
 
         setStatus("loading");
         setMessage("");
@@ -40,7 +49,12 @@ export function LeadForm({
             headers: {
               "Content-Type": "application/json"
             },
-            body: JSON.stringify(Object.fromEntries(formData.entries()))
+            body: JSON.stringify({
+              ...Object.fromEntries(formData.entries()),
+              source: submittedSource,
+              leadType,
+              sourcePage: window.location.pathname
+            })
           });
           const result = (await response.json()) as { ok: boolean; message?: string };
 
@@ -49,7 +63,7 @@ export function LeadForm({
           }
 
           setStatus("success");
-          setMessage("Thanks. Your enquiry has been sent to the developer team.");
+          setMessage(submittedSource === "Book Site Visit" ? "Thanks. Your site-visit request has been sent to our team." : "Thanks. Your enquiry has been sent to the developer team.");
           form.reset();
         } catch (error) {
           setStatus("error");
@@ -83,7 +97,7 @@ export function LeadForm({
       ) : null}
 
       <div className="mt-5 grid grid-cols-2 gap-2">
-        <Button type="submit" className="col-span-2" disabled={status === "loading"}>
+        <Button type="submit" name="leadAction" value={source} className="col-span-2" disabled={status === "loading"}>
           <Send className="size-4" aria-hidden /> Send enquiry
         </Button>
         <a href="tel:+919000000000" className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md border bg-background px-3 text-sm font-semibold">
@@ -92,7 +106,7 @@ export function LeadForm({
         <a href="https://wa.me/919000000000" className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-secondary px-3 text-sm font-semibold text-white">
           <MessageCircle className="size-4" aria-hidden /> WhatsApp
         </a>
-        <Button type="button" variant="accent" className="col-span-2">
+        <Button type="submit" name="leadAction" value="Book Site Visit" variant="accent" className="col-span-2" disabled={status === "loading"}>
           <CalendarCheck className="size-4" aria-hidden /> Book site visit
         </Button>
       </div>

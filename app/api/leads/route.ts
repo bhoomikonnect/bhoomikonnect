@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { createLead } from "@/lib/marketplace";
+import { createLead, updateLeadDelivery } from "@/lib/marketplace";
 import { leadSchema } from "@/lib/validations";
-import { notifyAdminOfLead } from "@/lib/resend";
+import { sendLeadNotifications } from "@/lib/notifications";
 
 const requests = new Map<string, { count: number; resetAt: number }>();
 
@@ -41,12 +41,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    const lead = await createLead(parsed.data);
-    notifyAdminOfLead(parsed.data).catch((error) => console.error(error));
+    const leadPayload = Object.fromEntries(
+      Object.entries(parsed.data).filter(([key]) => key !== "website")
+    ) as Omit<typeof parsed.data, "website">;
+    const lead = await createLead(leadPayload);
+    const delivery = await sendLeadNotifications(leadPayload, lead.id);
+    await updateLeadDelivery(lead.id, delivery);
+    delivery.errors.forEach((error) => console.error(`Lead notification: ${error}`));
 
     return NextResponse.json({
       ok: true,
-      lead
+      reference: lead.id
     });
   } catch (error) {
     console.error(error);

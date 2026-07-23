@@ -19,11 +19,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { AdminFieldExplorer } from "@/components/admin/AdminFieldExplorer";
-import { LocalAdminLogout } from "@/components/auth/LocalAdminLogout";
-import { adminMetrics } from "@/lib/data";
-import { getProperties } from "@/lib/marketplace";
+import { getProperties, listLeads } from "@/lib/marketplace";
 import { createMetadata } from "@/lib/seo";
-import { formatPrice } from "@/lib/utils";
 
 export const metadata: Metadata = createMetadata({
   title: "Admin Dashboard",
@@ -31,6 +28,7 @@ export const metadata: Metadata = createMetadata({
   path: "/admin",
   noIndex: true
 });
+export const dynamic = "force-dynamic";
 
 const moduleLabels = [
   "Properties", "Property Categories", "Property Types", "Projects", "Developers", "Property Owners",
@@ -46,9 +44,15 @@ const moduleIcons = [Building2, ShieldCheck, MessageSquare, Users, FileImage, Se
 const modules = moduleLabels.map((label, index) => ({ label, icon: moduleIcons[index % moduleIcons.length], count: index < 9 ? String(8 + index * 7) : "Manage" }));
 
 export default async function AdminPage() {
-  const properties = await getProperties();
+  const [properties, leads] = await Promise.all([getProperties(), listLeads()]);
   const cmsUrl = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL;
-  const localAdminEnabled = process.env.NODE_ENV !== "production" && !process.env.NEXT_PUBLIC_SUPABASE_URL && Boolean(process.env.LOCAL_ADMIN_SESSION_SECRET);
+  const failedNotifications = leads.filter((lead) => lead.delivery.adminEmail === "failed" || lead.delivery.adminSms === "failed").length;
+  const dashboardMetrics = [
+    { label: "Public properties", value: String(properties.length), delta: "Live marketplace", tone: "teal" },
+    { label: "Stored leads", value: String(leads.length), delta: "All form sources", tone: "green" },
+    { label: "New leads", value: String(leads.filter((lead) => lead.status.toLowerCase() === "new").length), delta: "Awaiting follow-up", tone: "amber" },
+    { label: "Delivery issues", value: String(failedNotifications), delta: failedNotifications ? "Needs attention" : "No failures", tone: failedNotifications ? "amber" : "green" }
+  ] as const;
 
   return (
     <>
@@ -63,7 +67,7 @@ export default async function AdminPage() {
               Manage properties, developers, users, leads, media, SEO, analytics, security, and platform settings.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2"><Link href="/buy" className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-950">View marketplace</Link>{cmsUrl ? <Link href={cmsUrl} target="_blank" className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-slate-950">Open Directus CMS</Link> : null}{localAdminEnabled ? <LocalAdminLogout /> : null}</div>
+          <div className="flex flex-wrap gap-2"><Link href="/buy" className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-950">View marketplace</Link>{cmsUrl ? <Link href={cmsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-slate-950">Open Directus CMS</Link> : null}</div>
         </div>
       </section>
 
@@ -74,9 +78,10 @@ export default async function AdminPage() {
             <Link href="/admin/pages/new" className="inline-flex min-h-10 items-center gap-2 rounded-md bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground"><FileText className="size-4" aria-hidden /> Add page</Link>
             <Link href="/admin/properties" className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"><Building2 className="size-4" aria-hidden /> Manage properties</Link>
             <Link href="/admin/pages" className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"><LayoutDashboard className="size-4" aria-hidden /> Manage pages</Link>
+            <Link href="/admin/leads" className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"><MessageSquare className="size-4" aria-hidden /> Open lead inbox</Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {adminMetrics.map((metric) => (
+            {dashboardMetrics.map((metric) => (
               <Card key={metric.label} className="p-5">
                 <p className="text-sm text-muted-foreground">{metric.label}</p>
                 <p className="mt-2 text-3xl font-bold">{metric.value}</p>
@@ -114,23 +119,22 @@ export default async function AdminPage() {
                 <table className="w-full min-w-[720px] text-left text-sm">
                   <thead className="bg-muted text-muted-foreground">
                     <tr>
-                      <th className="p-4 font-semibold">Property</th>
+                      <th className="p-4 font-semibold">Contact</th>
+                      <th className="p-4 font-semibold">Type</th>
                       <th className="p-4 font-semibold">Source</th>
-                      <th className="p-4 font-semibold">Value</th>
-                      <th className="p-4 font-semibold">Status</th>
+                      <th className="p-4 font-semibold">Delivery</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {properties.slice(0, 5).map((property, index) => (
-                      <tr key={property.id} className="border-t">
-                        <td className="p-4 font-semibold">{property.projectName}</td>
-                        <td className="p-4">{["WhatsApp", "Site Visit", "Callback", "Quick Enquiry", "Meeting"][index]}</td>
-                        <td className="p-4">{formatPrice(property.price)}</td>
-                        <td className="p-4">
-                          <Badge variant={index % 2 ? "accent" : "secondary"}>{index % 2 ? "Follow-up" : "New"}</Badge>
-                        </td>
+                    {leads.slice(0, 5).map((lead) => (
+                      <tr key={lead.id} className="border-t">
+                        <td className="p-4"><p className="font-semibold">{lead.name}</p><p className="mt-1 text-xs text-muted-foreground">{lead.phone}</p></td>
+                        <td className="p-4">{lead.leadType || "General Contact"}</td>
+                        <td className="p-4">{lead.source}</td>
+                        <td className="p-4"><div className="flex flex-wrap gap-1"><Badge variant={lead.delivery.adminEmail === "sent" ? "secondary" : lead.delivery.adminEmail === "failed" ? "accent" : "muted"}>Email {lead.delivery.adminEmail}</Badge><Badge variant={lead.delivery.adminSms === "sent" ? "secondary" : lead.delivery.adminSms === "failed" ? "accent" : "muted"}>SMS {lead.delivery.adminSms}</Badge></div></td>
                       </tr>
                     ))}
+                    {!leads.length ? <tr><td className="p-8 text-center text-muted-foreground" colSpan={4}>New form submissions will appear here.</td></tr> : null}
                   </tbody>
                 </table>
               </div>

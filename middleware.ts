@@ -4,15 +4,6 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const isAdminApi = request.nextUrl.pathname.startsWith("/api/admin");
   const isAdminRoute = request.nextUrl.pathname.startsWith("/admin") || isAdminApi;
-  const localSessionSecret = process.env.LOCAL_ADMIN_SESSION_SECRET;
-  const hasLocalAdminSession = process.env.NODE_ENV !== "production"
-    && Boolean(localSessionSecret)
-    && request.cookies.get("bk_local_admin")?.value === localSessionSecret;
-
-  if (isAdminRoute && hasLocalAdminSession) {
-    return NextResponse.next();
-  }
-
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) {

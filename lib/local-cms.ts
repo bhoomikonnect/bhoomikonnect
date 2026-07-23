@@ -4,7 +4,7 @@ import path from "node:path";
 import type { LocalCmsStore } from "@/types/cms";
 
 const storePath = path.join(process.cwd(), "data", "local-cms.json");
-const emptyStore: LocalCmsStore = { properties: [], deleted_property_slugs: [], pages: [] };
+const emptyStore: LocalCmsStore = { properties: [], deleted_property_slugs: [], pages: [], leads: [] };
 let writeQueue: Promise<unknown> = Promise.resolve();
 
 export async function readLocalCmsStore(): Promise<LocalCmsStore> {
@@ -13,7 +13,8 @@ export async function readLocalCmsStore(): Promise<LocalCmsStore> {
     return {
       properties: Array.isArray(value.properties) ? value.properties : [],
       deleted_property_slugs: Array.isArray(value.deleted_property_slugs) ? value.deleted_property_slugs : [],
-      pages: Array.isArray(value.pages) ? value.pages : []
+      pages: Array.isArray(value.pages) ? value.pages : [],
+      leads: Array.isArray(value.leads) ? value.leads : []
     };
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return structuredClone(emptyStore);

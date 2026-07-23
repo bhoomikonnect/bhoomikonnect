@@ -1,3 +1,5 @@
+import type { LeadRecord } from "@/types/leads";
+
 export type PropertyPublishingStatus = "draft" | "pending" | "approved" | "rejected" | "published" | "archived";
 
 export type CmsPropertyInput = {
@@ -123,4 +125,5 @@ export type LocalCmsStore = {
   properties: CmsPropertyRecord[];
   deleted_property_slugs: string[];
   pages: CmsPageRecord[];
+  leads: LeadRecord[];
 };

@@ -1,5 +1,6 @@
 import { cache } from "react";
-import { directusAssetUrl, directusCreateItem, directusReadItems, isDirectusConfigured } from "@/lib/directus";
+import { randomUUID } from "node:crypto";
+import { directusAssetUrl, directusCreateItem, directusReadItems, directusUpdateItem, isDirectusConfigured } from "@/lib/directus";
 import {
   cities as fallbackCities,
   developers as fallbackDevelopers,
@@ -10,8 +11,9 @@ import {
   getRelatedProperties as getFallbackRelatedProperties,
   properties as fallbackProperties
 } from "@/lib/data";
-import { readLocalCmsStore } from "@/lib/local-cms";
+import { readLocalCmsStore, updateLocalCmsStore } from "@/lib/local-cms";
 import type { Category, City, Developer, NearbyPlace, Property, PropertyStatus, PropertyType, SaleType } from "@/types/marketplace";
+import type { LeadDeliveryStatus, LeadPayload, LeadRecord } from "@/types/leads";
 
 type DirectusRecord = Record<string, unknown>;
 
@@ -354,31 +356,32 @@ export async function getRelatedProperties(property: Property) {
   return related.length ? related : getFallbackRelatedProperties(property);
 }
 
-export async function createLead(payload: {
-  name: string;
-  phone: string;
-  whatsapp?: string;
-  email?: string;
-  message?: string;
-  source: string;
-  leadType?: string;
-  propertySlug?: string;
-  developerSlug?: string;
-  serviceSlug?: string;
-  providerSlug?: string;
-  materialSlug?: string;
-  city?: string;
-  budget?: string;
-  preferredDate?: string;
-  sourcePage?: string;
-  consent?: boolean;
-  metadata?: Record<string, string | number | boolean | null>;
-}) {
+const skippedDelivery: LeadDeliveryStatus = {
+  adminEmail: "skipped",
+  customerEmail: "skipped",
+  adminSms: "skipped",
+  customerSms: "skipped",
+  errors: []
+};
+
+export async function createLead(payload: LeadPayload): Promise<LeadRecord> {
+  const now = new Date().toISOString();
   if (!isDirectusConfigured()) {
-    return { id: "demo-lead", mode: "fallback" };
+    const lead: LeadRecord = {
+      ...payload,
+      id: randomUUID(),
+      status: "new",
+      createdAt: now,
+      updatedAt: now,
+      delivery: skippedDelivery
+    };
+    await updateLocalCmsStore((store) => {
+      store.leads.unshift(lead);
+    });
+    return lead;
   }
 
-  return directusCreateItem("leads", {
+  const record = await directusCreateItem<Record<string, unknown>, DirectusRecord>("leads", {
     buyer_name: payload.name,
     phone: payload.phone,
     whatsapp: payload.whatsapp || null,
@@ -398,5 +401,73 @@ export async function createLead(payload: {
     consent: Boolean(payload.consent),
     metadata: payload.metadata || {},
     status: "new"
+  });
+  return {
+    ...payload,
+    id: asString(record.id, randomUUID()),
+    status: asString(record.status, "new"),
+    createdAt: asString(record.created_at, now),
+    updatedAt: asString(record.updated_at, now),
+    delivery: skippedDelivery
+  };
+}
+
+export async function updateLeadDelivery(leadId: string, delivery: LeadDeliveryStatus) {
+  if (!isDirectusConfigured()) {
+    await updateLocalCmsStore((store) => {
+      store.leads = store.leads.map((lead) => lead.id === leadId ? { ...lead, delivery, updatedAt: new Date().toISOString() } : lead);
+    });
+    return;
+  }
+
+  await directusUpdateItem("leads", leadId, {
+    metadata: {
+      notification_delivery: delivery
+    }
+  });
+}
+
+export async function listLeads(): Promise<LeadRecord[]> {
+  if (!isDirectusConfigured()) {
+    return (await readLocalCmsStore()).leads.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
+  const records = await directusReadItems<DirectusRecord>("leads", { fields: "*", sort: "-created_at" });
+  return records.map((record) => {
+    const metadata = record.metadata && typeof record.metadata === "object" ? record.metadata as DirectusRecord : {};
+    const notificationDelivery = metadata.notification_delivery && typeof metadata.notification_delivery === "object"
+      ? metadata.notification_delivery as Partial<LeadDeliveryStatus>
+      : {};
+    return {
+      id: asString(record.id),
+      name: asString(record.buyer_name ?? record.name),
+      phone: asString(record.phone),
+      whatsapp: asString(record.whatsapp) || undefined,
+      email: asString(record.email) || undefined,
+      message: asString(record.notes ?? record.message) || undefined,
+      source: asString(record.source, "Website"),
+      leadType: asString(record.lead_type, "General Contact"),
+      propertySlug: asString(record.property_slug) || undefined,
+      developerSlug: asString(record.developer_slug) || undefined,
+      serviceSlug: asString(record.service_slug) || undefined,
+      providerSlug: asString(record.provider_slug) || undefined,
+      materialSlug: asString(record.material_slug) || undefined,
+      city: asString(record.city) || undefined,
+      budget: asString(record.budget) || undefined,
+      preferredDate: asString(record.preferred_date) || undefined,
+      sourcePage: asString(record.source_page) || undefined,
+      consent: asBoolean(record.consent),
+      metadata: Object.fromEntries(Object.entries(metadata).filter(([key]) => key !== "notification_delivery").map(([key, value]) => [key, typeof value === "string" || typeof value === "number" || typeof value === "boolean" || value === null ? value : JSON.stringify(value)])),
+      status: asString(record.status, "new"),
+      createdAt: asString(record.created_at, new Date().toISOString()),
+      updatedAt: asString(record.updated_at ?? record.created_at, new Date().toISOString()),
+      delivery: {
+        adminEmail: notificationDelivery.adminEmail || "skipped",
+        customerEmail: notificationDelivery.customerEmail || "skipped",
+        adminSms: notificationDelivery.adminSms || "skipped",
+        customerSms: notificationDelivery.customerSms || "skipped",
+        errors: Array.isArray(notificationDelivery.errors) ? notificationDelivery.errors.map(String) : []
+      }
+    };
   });
 }
