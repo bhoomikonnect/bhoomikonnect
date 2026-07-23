@@ -45,3 +45,8 @@ export const publicEnv = {
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919000000000",
   phone: process.env.NEXT_PUBLIC_PRIMARY_PHONE || "+91 90000 00000"
 };
+
+export const publicContactLinks = {
+  phone: `tel:${publicEnv.phone.replace(/[^\d+]/g, "")}`,
+  whatsapp: `https://wa.me/${publicEnv.whatsapp.replace(/\D/g, "")}`
+};

@@ -127,7 +127,7 @@ export function PropertyEditor({ initialValue, propertyId }: { initialValue: Cms
           <Field label="Owner name"><Input value={value.owner_name} onChange={(event) => update("owner_name", event.target.value)} /></Field>
           <Field label="Developer name"><Input value={value.developer_name} onChange={(event) => update("developer_name", event.target.value)} /></Field>
           <Field label="Developer slug"><Input value={value.developer_slug} onChange={(event) => update("developer_slug", slugify(event.target.value))} /></Field>
-          <Field label="Directus developer ID" className="md:col-span-2"><Input value={value.developer_id} onChange={(event) => update("developer_id", event.target.value)} /><span className="text-xs font-normal text-muted-foreground">Required only when writing to a Directus database with the developer relation enforced.</span></Field>
+          <Field label="Developer record ID" className="md:col-span-2"><Input value={value.developer_id} onChange={(event) => update("developer_id", event.target.value)} /><span className="text-xs font-normal text-muted-foreground">Optional. Use an existing developer UUID when this property should be linked to a developer record.</span></Field>
         </section>
       ) : null}
 

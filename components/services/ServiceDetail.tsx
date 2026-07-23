@@ -12,6 +12,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { serviceFamilyMeta } from "@/lib/catalog";
 import { getService, getServiceProviders } from "@/lib/content";
+import { publicContactLinks } from "@/lib/env";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/seo";
 import { cn, formatPrice } from "@/lib/utils";
 import type { ServiceFamily } from "@/types/marketplace";
@@ -28,7 +29,7 @@ export async function ServiceDetail({ family, slug }: { family: ServiceFamily; s
   const meta = serviceFamilyMeta[family];
   return (
     <>
-      <section className="border-b bg-muted/45 py-8"><div className="container"><div className="flex flex-wrap gap-2 text-sm text-muted-foreground"><Link href="/">Home</Link><span>/</span><Link href={`/${family}`}>{meta.title}</Link><span>/</span><span className="text-foreground">{service.title}</span></div><div className="mt-6 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-end"><div><Badge><BadgeCheck className="size-3" aria-hidden /> Verified service</Badge><h1 className="mt-4 text-balance text-4xl font-bold sm:text-5xl">{service.title}</h1><p className="mt-4 max-w-3xl text-lg leading-8 text-muted-foreground">{service.summary}</p></div><div className="flex flex-wrap gap-2 lg:justify-end"><a href="tel:+919000000000" className={cn(buttonVariants({ variant: "outline" }))}><Phone className="size-4" aria-hidden /> Call</a><a href="https://wa.me/919000000000" className={cn(buttonVariants({ variant: "secondary" }))}><MessageCircle className="size-4" aria-hidden /> WhatsApp</a></div></div></div></section>
+      <section className="border-b bg-muted/45 py-8"><div className="container"><div className="flex flex-wrap gap-2 text-sm text-muted-foreground"><Link href="/">Home</Link><span>/</span><Link href={`/${family}`}>{meta.title}</Link><span>/</span><span className="text-foreground">{service.title}</span></div><div className="mt-6 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-end"><div><Badge><BadgeCheck className="size-3" aria-hidden /> Verified service</Badge><h1 className="mt-4 text-balance text-4xl font-bold sm:text-5xl">{service.title}</h1><p className="mt-4 max-w-3xl text-lg leading-8 text-muted-foreground">{service.summary}</p></div><div className="flex flex-wrap gap-2 lg:justify-end"><a href={publicContactLinks.phone} className={cn(buttonVariants({ variant: "outline" }))}><Phone className="size-4" aria-hidden /> Call</a><a href={publicContactLinks.whatsapp} className={cn(buttonVariants({ variant: "secondary" }))}><MessageCircle className="size-4" aria-hidden /> WhatsApp</a></div></div></div></section>
       <section className="py-8 sm:py-12"><div className="container grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-8">
           <div className="relative aspect-[16/8] overflow-hidden rounded-lg"><Image src={service.image} alt={`${service.title} work example`} fill priority sizes="(min-width: 1024px) 70vw, 100vw" className="object-cover" /></div>
@@ -41,7 +42,7 @@ export async function ServiceDetail({ family, slug }: { family: ServiceFamily; s
         </div>
         <aside id="quote" className="scroll-mt-24 lg:sticky lg:top-24 lg:self-start"><QuoteForm title={`Quote for ${service.title}`} leadType={leadTypes[family]} source={`${service.title} Detail`} serviceSlug={service.slug} compact /></aside>
       </div></section>
-      <div className="mobile-sticky-actions sticky bottom-0 z-30 grid grid-cols-3 border-t bg-background p-2 lg:hidden"><a href="tel:+919000000000" className={cn(buttonVariants({ variant: "outline" }))}>Call</a><a href="https://wa.me/919000000000" className={cn(buttonVariants({ variant: "secondary" }))}>WhatsApp</a><a href="#quote" className={cn(buttonVariants())}>Book</a></div>
+      <div className="mobile-sticky-actions sticky bottom-0 z-30 grid grid-cols-3 border-t bg-background p-2 lg:hidden"><a href={publicContactLinks.phone} className={cn(buttonVariants({ variant: "outline" }))}>Call</a><a href={publicContactLinks.whatsapp} className={cn(buttonVariants({ variant: "secondary" }))}>WhatsApp</a><a href="#quote" className={cn(buttonVariants())}>Book</a></div>
       <JsonLd data={[serviceSchema(service), faqSchema(service.faq), breadcrumbSchema([{ name: "Home", url: "/" }, { name: meta.title, url: `/${family}` }, { name: service.title, url: `/${family}/${service.slug}` }])]} />
     </>
   );

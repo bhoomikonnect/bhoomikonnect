@@ -10,6 +10,7 @@ import {
 } from "@/lib/directus";
 import { readLocalCmsStore, updateLocalCmsStore } from "@/lib/local-cms";
 import { getProperties } from "@/lib/marketplace";
+import { createSupabaseAdminClient, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 import type { CmsPageInput, CmsPageRecord, CmsPageSection, CmsPropertyInput, CmsPropertyRecord } from "@/types/cms";
 import type { Property } from "@/types/marketplace";
 
@@ -143,10 +144,27 @@ function directusPropertyPayload(property: CmsPropertyInput) {
   };
 }
 
+function supabasePropertyPayload(property: CmsPropertyInput) {
+  return {
+    ...directusPropertyPayload(property),
+    developer_id: property.developer_id || null,
+    developer_name: property.developer_name || null,
+    owner_name: property.owner_name || null,
+    rent_amount: property.rent_amount || null
+  };
+}
+
 export async function listCmsProperties() {
   if (isDirectusConfigured()) {
     const records = await directusReadItems<UnknownRecord>("properties", { fields: "*,developer_id.id,developer_id.name,developer_id.slug", sort: "-updated_at" });
     return records.map((record) => normalizeCmsProperty(record, "directus"));
+  }
+
+  if (isSupabaseAdminConfigured()) {
+    const supabase = createSupabaseAdminClient()!;
+    const { data, error } = await supabase.from("properties").select("*").order("updated_at", { ascending: false });
+    if (error) throw error;
+    return (data || []).map((record) => normalizeCmsProperty(record as UnknownRecord, "supabase"));
   }
 
   const [store, publicProperties] = await Promise.all([readLocalCmsStore(), getProperties()]);
@@ -166,6 +184,13 @@ export async function createCmsProperty(input: CmsPropertyInput) {
     return normalizeCmsProperty(record, "directus");
   }
 
+  if (isSupabaseAdminConfigured()) {
+    const supabase = createSupabaseAdminClient()!;
+    const { data, error } = await supabase.from("properties").insert(supabasePropertyPayload(input)).select("*").single();
+    if (error) throw error;
+    return normalizeCmsProperty(data as UnknownRecord, "supabase");
+  }
+
   const record: CmsPropertyRecord = { ...input, id: randomUUID(), created_at: now, updated_at: now, source: "local" };
   await updateLocalCmsStore((store) => {
     if (store.properties.some((property) => property.slug === input.slug)) throw new Error("A property with this slug already exists.");
@@ -183,6 +208,13 @@ export async function updateCmsProperty(identifier: string, input: CmsPropertyIn
     return normalizeCmsProperty(record, "directus");
   }
 
+  if (isSupabaseAdminConfigured()) {
+    const supabase = createSupabaseAdminClient()!;
+    const { data, error } = await supabase.from("properties").update(supabasePropertyPayload(input)).eq("id", existing.id).select("*").single();
+    if (error) throw error;
+    return normalizeCmsProperty(data as UnknownRecord, "supabase");
+  }
+
   const record: CmsPropertyRecord = { ...input, id: existing.id, created_at: existing.created_at, updated_at: new Date().toISOString(), source: "local" };
   await updateLocalCmsStore((store) => {
     if (store.properties.some((property) => property.slug === input.slug && property.id !== existing.id)) throw new Error("A property with this slug already exists.");
@@ -198,6 +230,17 @@ export async function deleteCmsProperty(identifier: string) {
   if (!existing) throw new Error("Property not found.");
   if (isDirectusConfigured()) {
     await directusUpdateItem("properties", existing.id, { active: false, publishing_status: "archived", deleted_at: new Date().toISOString() });
+    return;
+  }
+
+  if (isSupabaseAdminConfigured()) {
+    const supabase = createSupabaseAdminClient()!;
+    const { error } = await supabase.from("properties").update({
+      active: false,
+      publishing_status: "archived",
+      deleted_at: new Date().toISOString()
+    }).eq("id", existing.id);
+    if (error) throw error;
     return;
   }
 
@@ -238,6 +281,21 @@ export async function listCmsPages() {
     ]);
     return pages.map((page) => normalizePage(page, sections.filter((section) => stringValue(typeof section.page_id === "object" && section.page_id ? (section.page_id as UnknownRecord).id : section.page_id) === stringValue(page.id)), "directus"));
   }
+
+  if (isSupabaseAdminConfigured()) {
+    const supabase = createSupabaseAdminClient()!;
+    const [pageResult, sectionResult] = await Promise.all([
+      supabase.from("cms_pages").select("*").is("deleted_at", null).order("updated_at", { ascending: false }),
+      supabase.from("cms_sections").select("*").eq("is_active", true).order("display_order", { ascending: true })
+    ]);
+    if (pageResult.error) throw pageResult.error;
+    if (sectionResult.error) throw sectionResult.error;
+    const sections = (sectionResult.data || []) as UnknownRecord[];
+    return ((pageResult.data || []) as UnknownRecord[]).map((page) =>
+      normalizePage(page, sections.filter((section) => stringValue(section.page_id) === stringValue(page.id)), "supabase")
+    );
+  }
+
   return (await readLocalCmsStore()).pages.map((page) => ({ ...page, source: "local" as const }));
 }
 
@@ -272,6 +330,33 @@ export async function createCmsPage(input: CmsPageInput) {
     return normalizePage(page, sections, "directus");
   }
 
+  if (isSupabaseAdminConfigured()) {
+    const supabase = createSupabaseAdminClient()!;
+    const { data: page, error: pageError } = await supabase.from("cms_pages").insert({
+      title: input.title,
+      slug: input.slug,
+      template: input.template,
+      status: input.status,
+      seo_title: input.seo_title,
+      meta_description: input.meta_description,
+      canonical_url: input.canonical_url
+    }).select("*").single();
+    if (pageError) throw pageError;
+
+    const sectionPayloads = input.sections.map((section, index) => ({
+      page_id: page.id,
+      block_type: section.block_type,
+      content: section,
+      display_order: index,
+      is_active: true
+    }));
+    const sectionResult = sectionPayloads.length
+      ? await supabase.from("cms_sections").insert(sectionPayloads).select("*")
+      : { data: [], error: null };
+    if (sectionResult.error) throw sectionResult.error;
+    return normalizePage(page as UnknownRecord, (sectionResult.data || []) as UnknownRecord[], "supabase");
+  }
+
   const record: CmsPageRecord = { ...input, id: randomUUID(), created_at: now, updated_at: now, source: "local" };
   await updateLocalCmsStore((store) => {
     if (store.pages.some((page) => page.slug === input.slug)) throw new Error("A page with this slug already exists.");
@@ -295,6 +380,36 @@ export async function updateCmsPage(identifier: string, input: CmsPageInput) {
     return normalizePage(page, sections, "directus");
   }
 
+  if (isSupabaseAdminConfigured()) {
+    const supabase = createSupabaseAdminClient()!;
+    const { data: page, error: pageError } = await supabase.from("cms_pages").update({
+      title: input.title,
+      slug: input.slug,
+      template: input.template,
+      status: input.status,
+      seo_title: input.seo_title,
+      meta_description: input.meta_description,
+      canonical_url: input.canonical_url,
+      updated_at: new Date().toISOString()
+    }).eq("id", existing.id).select("*").single();
+    if (pageError) throw pageError;
+
+    const { error: deleteError } = await supabase.from("cms_sections").delete().eq("page_id", existing.id);
+    if (deleteError) throw deleteError;
+    const sectionPayloads = input.sections.map((section, index) => ({
+      page_id: existing.id,
+      block_type: section.block_type,
+      content: section,
+      display_order: index,
+      is_active: true
+    }));
+    const sectionResult = sectionPayloads.length
+      ? await supabase.from("cms_sections").insert(sectionPayloads).select("*")
+      : { data: [], error: null };
+    if (sectionResult.error) throw sectionResult.error;
+    return normalizePage(page as UnknownRecord, (sectionResult.data || []) as UnknownRecord[], "supabase");
+  }
+
   const record: CmsPageRecord = { ...input, id: existing.id, created_at: existing.created_at, updated_at: new Date().toISOString(), source: "local" };
   await updateLocalCmsStore((store) => {
     if (store.pages.some((page) => page.slug === input.slug && page.id !== existing.id)) throw new Error("A page with this slug already exists.");
@@ -311,5 +426,17 @@ export async function deleteCmsPage(identifier: string) {
     await directusUpdateItem("cms_pages", existing.id, { status: "archived", deleted_at: new Date().toISOString() });
     return;
   }
+
+  if (isSupabaseAdminConfigured()) {
+    const supabase = createSupabaseAdminClient()!;
+    const { error } = await supabase.from("cms_pages").update({
+      status: "archived",
+      deleted_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }).eq("id", existing.id);
+    if (error) throw error;
+    return;
+  }
+
   await updateLocalCmsStore((store) => { store.pages = store.pages.filter((page) => page.id !== existing.id); });
 }

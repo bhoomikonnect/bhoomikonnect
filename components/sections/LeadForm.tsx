@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { publicContactLinks } from "@/lib/env";
 
 type LeadFormProps = {
   title?: string;
@@ -100,10 +101,10 @@ export function LeadForm({
         <Button type="submit" name="leadAction" value={source} className="col-span-2" disabled={status === "loading"}>
           <Send className="size-4" aria-hidden /> Send enquiry
         </Button>
-        <a href="tel:+919000000000" className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md border bg-background px-3 text-sm font-semibold">
+        <a href={publicContactLinks.phone} className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md border bg-background px-3 text-sm font-semibold">
           <PhoneCall className="size-4" aria-hidden /> Call
         </a>
-        <a href="https://wa.me/919000000000" className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-secondary px-3 text-sm font-semibold text-white">
+        <a href={publicContactLinks.whatsapp} className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-secondary px-3 text-sm font-semibold text-white">
           <MessageCircle className="size-4" aria-hidden /> WhatsApp
         </a>
         <Button type="submit" name="leadAction" value="Book Site Visit" variant="accent" className="col-span-2" disabled={status === "loading"}>

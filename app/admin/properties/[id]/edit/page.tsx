@@ -12,5 +12,5 @@ export const metadata: Metadata = createMetadata({ title: "Edit Property", descr
 export default async function EditPropertyPage({ params }: { params: { id: string } }) {
   const property = await getCmsProperty(decodeURIComponent(params.id));
   if (!property) notFound();
-  return <section className="py-8"><div className="container grid gap-7"><div><Badge><Edit3 className="size-3" aria-hidden /> Edit property</Badge><h1 className="mt-3 text-3xl font-bold">{property.title}</h1><p className="mt-2 text-sm text-muted-foreground">Source: {property.source}. Saving a demo property creates an editable local override.</p></div><PropertyEditor initialValue={property} propertyId={property.id} /></div></section>;
+  return <section className="py-8"><div className="container grid gap-7"><div><Badge><Edit3 className="size-3" aria-hidden /> Edit property</Badge><h1 className="mt-3 text-3xl font-bold">{property.title}</h1><p className="mt-2 text-sm text-muted-foreground">Content source: {property.source || "CMS"}.</p></div><PropertyEditor initialValue={property} propertyId={property.id} /></div></section>;
 }

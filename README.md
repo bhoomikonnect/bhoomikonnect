@@ -2,7 +2,7 @@
 
 **From Land to Dream Home — Everything Under One Roof**
 
-BhoomiKonnect is a company-managed property, construction, interiors, renovation, maintenance, and materials marketplace. It uses Next.js App Router, TypeScript, Tailwind CSS, shadcn-style primitives, Framer Motion, Supabase Auth/Postgres/Storage, and Directus as the operations CMS.
+BhoomiKonnect is a company-managed property, construction, interiors, renovation, maintenance, and materials marketplace. It uses Next.js App Router, TypeScript, Tailwind CSS, shadcn-style primitives, Framer Motion, and Supabase for authentication, PostgreSQL, storage, and the included operations CMS. Directus remains an optional CMS adapter.
 
 The repository includes original demo content only. No blog module is included by product choice.
 
@@ -18,7 +18,7 @@ pnpm lint
 
 ## Environment
 
-Create `.env.local` when connecting Directus, Supabase, or Google Maps:
+Create `.env.local` when connecting Supabase, optional Directus, or Google Maps:
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://bhoomikonnect.com
@@ -45,14 +45,14 @@ Never expose `SUPABASE_SERVICE_ROLE_KEY`, `DIRECTUS_STATIC_TOKEN`, or `RESEND_AP
 3. Run `supabase/schema.sql` in a new Supabase project.
 4. Apply the SQL files in `supabase/migrations` in filename order.
 5. Optionally apply `supabase/seed.sql` for original demo records.
-6. Connect Directus to the same PostgreSQL database and configure the collections in `directus/README.md`.
+6. Optionally connect Directus to the same PostgreSQL database and configure the collections in `directus/README.md`.
 7. Run `pnpm dev`.
 
-Without Directus, public pages use typed local demo data. Without Supabase, public browsing and CMS-fallback content still work, while authentication explains that environment setup is required.
+With the server-only Supabase key configured, production properties, CMS pages, and leads persist in Supabase. Without Supabase, local development can still use typed demo data.
 
 ## CMS
 
-Directus is integrated as the CMS layer. Public pages read from Directus on the server when configured, while lead submissions go through `app/api/leads/route.ts`. Directus manages content and operations; Supabase remains the source for authentication, PostgreSQL, storage, and RLS.
+The protected admin writes properties, pages, and leads directly to Supabase. Lead submissions go through `app/api/leads/route.ts`. When both Directus variables are configured, Directus becomes the preferred CMS adapter without changing public routes.
 
 ## Main routes
 
@@ -83,7 +83,7 @@ where email = 'your-admin@example.com'
 on conflict (id) do update set role = excluded.role;
 ```
 
-Directus administrator credentials are created when the Directus instance is initialized and are never stored in this repository. Admin and dashboard routes require a valid Supabase session. Administrator access requires the `admin` or `super_admin` profile role, with `ADMIN_EMAIL` available only for first-administrator bootstrap.
+Admin and dashboard routes require a valid Supabase session. Administrator access requires the `admin` or `super_admin` profile role, with `ADMIN_EMAIL` available only for first-administrator bootstrap.
 
 ## Admin content workflow
 
@@ -96,7 +96,7 @@ The protected admin now includes operational property and page management:
 - `/admin/leads`: persistent inbox for every enquiry form, including admin/customer email and SMS delivery status.
 - `/pages/[slug]`: SEO-rendered public route for published CMS pages.
 
-When Directus is configured, the admin repositories use Directus collections. Without Directus, development writes persist to `data/local-cms.json`; local filesystem writes are deliberately blocked in production. Published local properties are merged into marketplace search and detail routes immediately.
+Supabase is the default production repository. Directus takes precedence when explicitly configured. Without either production repository, local development writes persist to `data/local-cms.json`.
 
 ## Lead email and SMS
 
@@ -119,7 +119,7 @@ LEAD_SMS_TO=+919000000000,+919111111111
 SEND_CUSTOMER_CONFIRMATION_SMS=false
 ```
 
-Recipient numbers must use E.164 format. Admin notifications are sent to every configured email and phone recipient. Customer email confirmation is enabled by default when an address is supplied; customer SMS confirmation is opt-in and requires the submitted number to begin with `+`. A lead is stored before notification delivery begins, and delivery failures remain visible in `/admin/leads`.
+Resend email works without Twilio. When optional SMS is enabled, recipient numbers must use E.164 format. Customer email confirmation is enabled by default when an address is supplied; customer SMS confirmation is opt-in. A lead is stored before notification delivery begins, and delivery failures remain visible in `/admin/leads`.
 
 ## Forms and leads
 
@@ -127,13 +127,13 @@ React Hook Form and Zod power property submissions and quote forms. Every lead c
 
 ## Deployment
 
-Vercel is the recommended deployment target. Add the environment variables to the Vercel project, set the production site URL, allow the Directus asset host in `next.config.mjs`, and configure the Supabase OAuth callback as `https://your-domain/auth/callback`.
+Vercel is the recommended deployment target. Add the environment variables to the Vercel project, set the production site URL, and configure the Supabase OAuth callback as `https://your-domain/auth/callback`. Add a Directus asset host only when the optional adapter is enabled.
 
 Before launch, replace demo contact details, add legally reviewed policies, connect durable anti-spam/rate limiting, configure storage buckets, verify RLS in staging, and run Lighthouse against production assets.
 
 ## Production gate
 
-`pnpm build` automatically validates required production configuration on Vercel and CI. Local builds skip the gate; run `pnpm check:production` to enforce it locally. The check requires real HTTPS URLs, Supabase authentication, Directus CMS access, Resend email delivery, Twilio SMS delivery, administrator recipients, and public contact details. It rejects placeholder domains and phone numbers and never prints secret values.
+`pnpm build` automatically validates required production configuration on Vercel and CI. Local builds skip the gate; run `pnpm check:production` to enforce it locally. The free launch check requires real HTTPS URLs, Supabase CMS/authentication, Resend email delivery, administrator recipients, and public contact details. Directus and Twilio are validated only when enabled. Placeholder domains and phone numbers are rejected, and secret values are never printed.
 
 No development administrator, default password, password hint, local-session bypass, or public admin preview route is included. Production secrets belong only in the Vercel environment and must not be committed.
 

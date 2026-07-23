@@ -12,6 +12,7 @@ import {
   properties as fallbackProperties
 } from "@/lib/data";
 import { readLocalCmsStore, updateLocalCmsStore } from "@/lib/local-cms";
+import { createSupabaseAdminClient, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 import type { Category, City, Developer, NearbyPlace, Property, PropertyStatus, PropertyType, SaleType } from "@/types/marketplace";
 import type { LeadDeliveryStatus, LeadPayload, LeadRecord } from "@/types/leads";
 
@@ -261,9 +262,19 @@ async function safeDirectus<T>(operation: () => Promise<T>, fallback: T) {
   }
 }
 
-export const getDevelopers = cache(async () =>
-  safeDirectus(
-    async () => {
+async function safeSupabase<T>(operation: () => Promise<T>, fallback: T) {
+  if (!isSupabaseAdminConfigured()) return fallback;
+  try {
+    return await operation();
+  } catch (error) {
+    console.warn(error);
+    return fallback;
+  }
+}
+
+export const getDevelopers = cache(async () => {
+  if (isDirectusConfigured()) {
+    return safeDirectus(async () => {
       const records = await directusReadItems<DirectusRecord>("developers", {
         fields: "*",
         "filter[active][_eq]": true,
@@ -271,10 +282,17 @@ export const getDevelopers = cache(async () =>
       });
 
       return records.map(mapDeveloper);
-    },
-    fallbackMarketplaceDevelopers
-  )
-);
+    }, fallbackMarketplaceDevelopers);
+  }
+
+  return safeSupabase(async () => {
+    const supabase = createSupabaseAdminClient()!;
+    const { data, error } = await supabase.from("developers").select("*").eq("active", true).order("name");
+    if (error) throw error;
+    const developers = (data || []).map((record) => mapDeveloper(record as DirectusRecord));
+    return developers.length ? developers : fallbackMarketplaceDevelopers;
+  }, fallbackMarketplaceDevelopers);
+});
 
 export const getProperties = cache(async () => {
   if (isDirectusConfigured()) {
@@ -292,6 +310,23 @@ export const getProperties = cache(async () => {
     );
   }
 
+  if (isSupabaseAdminConfigured()) {
+    return safeSupabase(async () => {
+      const supabase = createSupabaseAdminClient()!;
+      const { data, error } = await supabase
+        .from("properties")
+        .select("*,developer:developers(id,name,slug)")
+        .eq("active", true)
+        .eq("publishing_status", "published")
+        .is("deleted_at", null)
+        .order("featured", { ascending: false })
+        .order("title", { ascending: true });
+      if (error) throw error;
+      const properties = (data || []).map((record) => mapProperty(record as unknown as DirectusRecord)).filter((property) => property.active);
+      return properties.length ? properties : fallbackMarketplaceProperties;
+    }, fallbackMarketplaceProperties);
+  }
+
   const store = await readLocalCmsStore();
   const localProperties = store.properties
     .filter((property) => property.active && property.publishing_status === "published")
@@ -307,9 +342,9 @@ export const getProperties = cache(async () => {
   return [...merged.values()].sort((left, right) => Number(right.featuredProperty) - Number(left.featuredProperty) || left.title.localeCompare(right.title));
 });
 
-export const getCities = cache(async () =>
-  safeDirectus(
-    async () => {
+export const getCities = cache(async () => {
+  if (isDirectusConfigured()) {
+    return safeDirectus(async () => {
       const records = await directusReadItems<DirectusRecord>("cities", {
         fields: "*",
         "filter[active][_eq]": true,
@@ -317,10 +352,17 @@ export const getCities = cache(async () =>
       });
 
       return records.map(mapCity);
-    },
-    fallbackCities
-  )
-);
+    }, fallbackCities);
+  }
+
+  return safeSupabase(async () => {
+    const supabase = createSupabaseAdminClient()!;
+    const { data, error } = await supabase.from("cities").select("*").eq("active", true).order("name");
+    if (error) throw error;
+    const cities = (data || []).map((record) => mapCity(record as DirectusRecord));
+    return cities.length ? cities : fallbackCities;
+  }, fallbackCities);
+});
 
 export async function getDeveloperBySlug(slug: string) {
   const developers = await getDevelopers();
@@ -364,24 +406,46 @@ const skippedDelivery: LeadDeliveryStatus = {
   errors: []
 };
 
-export async function createLead(payload: LeadPayload): Promise<LeadRecord> {
-  const now = new Date().toISOString();
-  if (!isDirectusConfigured()) {
-    const lead: LeadRecord = {
-      ...payload,
-      id: randomUUID(),
-      status: "new",
-      createdAt: now,
-      updatedAt: now,
-      delivery: skippedDelivery
-    };
-    await updateLocalCmsStore((store) => {
-      store.leads.unshift(lead);
-    });
-    return lead;
-  }
+function mapLeadRecord(record: DirectusRecord): LeadRecord {
+  const metadata = record.metadata && typeof record.metadata === "object" ? record.metadata as DirectusRecord : {};
+  const notificationDelivery = metadata.notification_delivery && typeof metadata.notification_delivery === "object"
+    ? metadata.notification_delivery as Partial<LeadDeliveryStatus>
+    : {};
+  return {
+    id: asString(record.id),
+    name: asString(record.buyer_name ?? record.name),
+    phone: asString(record.phone),
+    whatsapp: asString(record.whatsapp) || undefined,
+    email: asString(record.email) || undefined,
+    message: asString(record.notes ?? record.message) || undefined,
+    source: asString(record.source, "Website"),
+    leadType: asString(record.lead_type, "General Contact"),
+    propertySlug: asString(record.property_slug) || undefined,
+    developerSlug: asString(record.developer_slug) || undefined,
+    serviceSlug: asString(record.service_slug) || undefined,
+    providerSlug: asString(record.provider_slug) || undefined,
+    materialSlug: asString(record.material_slug) || undefined,
+    city: asString(record.city) || undefined,
+    budget: asString(record.budget) || undefined,
+    preferredDate: asString(record.preferred_date) || undefined,
+    sourcePage: asString(record.source_page) || undefined,
+    consent: asBoolean(record.consent),
+    metadata: Object.fromEntries(Object.entries(metadata).filter(([key]) => key !== "notification_delivery").map(([key, value]) => [key, typeof value === "string" || typeof value === "number" || typeof value === "boolean" || value === null ? value : JSON.stringify(value)])),
+    status: asString(record.status, "new"),
+    createdAt: asString(record.created_at, new Date().toISOString()),
+    updatedAt: asString(record.updated_at ?? record.created_at, new Date().toISOString()),
+    delivery: {
+      adminEmail: notificationDelivery.adminEmail || "skipped",
+      customerEmail: notificationDelivery.customerEmail || "skipped",
+      adminSms: notificationDelivery.adminSms || "skipped",
+      customerSms: notificationDelivery.customerSms || "skipped",
+      errors: Array.isArray(notificationDelivery.errors) ? notificationDelivery.errors.map(String) : []
+    }
+  };
+}
 
-  const record = await directusCreateItem<Record<string, unknown>, DirectusRecord>("leads", {
+function leadDatabasePayload(payload: LeadPayload) {
+  return {
     buyer_name: payload.name,
     phone: payload.phone,
     whatsapp: payload.whatsapp || null,
@@ -401,73 +465,79 @@ export async function createLead(payload: LeadPayload): Promise<LeadRecord> {
     consent: Boolean(payload.consent),
     metadata: payload.metadata || {},
     status: "new"
-  });
-  return {
-    ...payload,
-    id: asString(record.id, randomUUID()),
-    status: asString(record.status, "new"),
-    createdAt: asString(record.created_at, now),
-    updatedAt: asString(record.updated_at, now),
-    delivery: skippedDelivery
   };
 }
 
+export async function createLead(payload: LeadPayload): Promise<LeadRecord> {
+  const now = new Date().toISOString();
+  if (isDirectusConfigured()) {
+    const record = await directusCreateItem<Record<string, unknown>, DirectusRecord>("leads", leadDatabasePayload(payload));
+    return { ...mapLeadRecord(record), ...payload, delivery: skippedDelivery };
+  }
+
+  if (isSupabaseAdminConfigured()) {
+    const supabase = createSupabaseAdminClient()!;
+    const { data, error } = await supabase.from("leads").insert(leadDatabasePayload(payload)).select("*").single();
+    if (error) throw error;
+    return { ...mapLeadRecord(data as DirectusRecord), ...payload, delivery: skippedDelivery };
+  }
+
+  const lead: LeadRecord = {
+    ...payload,
+    id: randomUUID(),
+    status: "new",
+    createdAt: now,
+    updatedAt: now,
+    delivery: skippedDelivery
+  };
+  await updateLocalCmsStore((store) => {
+    store.leads.unshift(lead);
+  });
+  return lead;
+}
+
 export async function updateLeadDelivery(leadId: string, delivery: LeadDeliveryStatus) {
-  if (!isDirectusConfigured()) {
-    await updateLocalCmsStore((store) => {
-      store.leads = store.leads.map((lead) => lead.id === leadId ? { ...lead, delivery, updatedAt: new Date().toISOString() } : lead);
+  if (isDirectusConfigured()) {
+    await directusUpdateItem("leads", leadId, {
+      metadata: {
+        notification_delivery: delivery
+      }
     });
     return;
   }
 
-  await directusUpdateItem("leads", leadId, {
-    metadata: {
-      notification_delivery: delivery
-    }
+  if (isSupabaseAdminConfigured()) {
+    const supabase = createSupabaseAdminClient()!;
+    const { data: existing, error: readError } = await supabase.from("leads").select("metadata").eq("id", leadId).single();
+    if (readError) throw readError;
+    const metadata = existing?.metadata && typeof existing.metadata === "object" && !Array.isArray(existing.metadata)
+      ? existing.metadata
+      : {};
+    const { error } = await supabase.from("leads").update({
+      metadata: { ...metadata, notification_delivery: delivery },
+      updated_at: new Date().toISOString()
+    }).eq("id", leadId);
+    if (error) throw error;
+    return;
+  }
+
+  await updateLocalCmsStore((store) => {
+    store.leads = store.leads.map((lead) => lead.id === leadId ? { ...lead, delivery, updatedAt: new Date().toISOString() } : lead);
   });
 }
 
 export async function listLeads(): Promise<LeadRecord[]> {
-  if (!isDirectusConfigured()) {
-    return (await readLocalCmsStore()).leads.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  if (isDirectusConfigured()) {
+    const records = await directusReadItems<DirectusRecord>("leads", { fields: "*", sort: "-created_at" });
+    return records.map(mapLeadRecord);
   }
 
-  const records = await directusReadItems<DirectusRecord>("leads", { fields: "*", sort: "-created_at" });
-  return records.map((record) => {
-    const metadata = record.metadata && typeof record.metadata === "object" ? record.metadata as DirectusRecord : {};
-    const notificationDelivery = metadata.notification_delivery && typeof metadata.notification_delivery === "object"
-      ? metadata.notification_delivery as Partial<LeadDeliveryStatus>
-      : {};
-    return {
-      id: asString(record.id),
-      name: asString(record.buyer_name ?? record.name),
-      phone: asString(record.phone),
-      whatsapp: asString(record.whatsapp) || undefined,
-      email: asString(record.email) || undefined,
-      message: asString(record.notes ?? record.message) || undefined,
-      source: asString(record.source, "Website"),
-      leadType: asString(record.lead_type, "General Contact"),
-      propertySlug: asString(record.property_slug) || undefined,
-      developerSlug: asString(record.developer_slug) || undefined,
-      serviceSlug: asString(record.service_slug) || undefined,
-      providerSlug: asString(record.provider_slug) || undefined,
-      materialSlug: asString(record.material_slug) || undefined,
-      city: asString(record.city) || undefined,
-      budget: asString(record.budget) || undefined,
-      preferredDate: asString(record.preferred_date) || undefined,
-      sourcePage: asString(record.source_page) || undefined,
-      consent: asBoolean(record.consent),
-      metadata: Object.fromEntries(Object.entries(metadata).filter(([key]) => key !== "notification_delivery").map(([key, value]) => [key, typeof value === "string" || typeof value === "number" || typeof value === "boolean" || value === null ? value : JSON.stringify(value)])),
-      status: asString(record.status, "new"),
-      createdAt: asString(record.created_at, new Date().toISOString()),
-      updatedAt: asString(record.updated_at ?? record.created_at, new Date().toISOString()),
-      delivery: {
-        adminEmail: notificationDelivery.adminEmail || "skipped",
-        customerEmail: notificationDelivery.customerEmail || "skipped",
-        adminSms: notificationDelivery.adminSms || "skipped",
-        customerSms: notificationDelivery.customerSms || "skipped",
-        errors: Array.isArray(notificationDelivery.errors) ? notificationDelivery.errors.map(String) : []
-      }
-    };
-  });
+  if (isSupabaseAdminConfigured()) {
+    const supabase = createSupabaseAdminClient()!;
+    const { data, error } = await supabase.from("leads").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data || []).map((record) => mapLeadRecord(record as DirectusRecord));
+  }
+
+  return (await readLocalCmsStore()).leads.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 }

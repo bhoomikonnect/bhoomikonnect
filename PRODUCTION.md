@@ -24,9 +24,13 @@ on conflict (id) do update set role = excluded.role;
 https://your-domain.com/auth/callback
 ```
 
-## 2. Directus
+7. Copy the server-only Supabase secret key into `SUPABASE_SERVICE_ROLE_KEY`. Never use it in a `NEXT_PUBLIC_` variable.
 
-Connect Directus to the production PostgreSQL database and follow `directus/README.md`. Create a server-side static token with the documented collection permissions. Never expose this token with a `NEXT_PUBLIC_` prefix.
+## 2. Included CMS
+
+The protected BhoomiKonnect admin uses Supabase PostgreSQL directly for properties, pages, and leads. No separate CMS subscription is required.
+
+Directus remains an optional override. When used, connect it to PostgreSQL and follow `directus/README.md`. Configure `DIRECTUS_URL` and `DIRECTUS_STATIC_TOKEN` together, and never expose the token with a `NEXT_PUBLIC_` prefix.
 
 ## 3. Resend Email
 
@@ -42,9 +46,9 @@ LEAD_NOTIFICATION_EMAILS=admin@your-domain.com,sales@your-domain.com
 SEND_CUSTOMER_CONFIRMATION_EMAIL=true
 ```
 
-## 4. Twilio SMS
+## 4. Optional Twilio SMS
 
-Use E.164 numbers. Configure either a sender number or a Messaging Service SID.
+Automated carrier SMS is optional and normally paid. Omit every Twilio variable for the free email-and-WhatsApp launch mode. When enabled, use E.164 numbers and configure either a sender number or a Messaging Service SID.
 
 ```bash
 TWILIO_ACCOUNT_SID=
@@ -70,13 +74,17 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 ADMIN_EMAIL=your-admin@your-domain.com
-DIRECTUS_URL=https://cms.your-domain.com
-DIRECTUS_STATIC_TOKEN=
-DIRECTUS_CACHE_SECONDS=60
 RESEND_API_KEY=
 RESEND_FROM_EMAIL=
 LEAD_NOTIFICATION_EMAILS=
 SEND_CUSTOMER_CONFIRMATION_EMAIL=true
+
+# Optional Directus override
+DIRECTUS_URL=
+DIRECTUS_STATIC_TOKEN=
+DIRECTUS_CACHE_SECONDS=60
+
+# Optional paid SMS
 TWILIO_ACCOUNT_SID=
 TWILIO_AUTH_TOKEN=
 TWILIO_FROM_NUMBER=
@@ -97,8 +105,8 @@ pnpm check:production
 2. Sign in through `/login`; confirm a non-admin cannot open `/admin`.
 3. Submit one enquiry from each form family.
 4. Confirm records in `/admin/leads`.
-5. Confirm admin email and SMS show `sent`.
-6. Confirm customer email delivery and optional SMS.
+5. Confirm admin and customer email show `sent`.
+6. If Twilio is enabled, confirm the applicable SMS delivery states.
 7. Test property/page publish, edit, preview, and archive.
 8. Verify `/robots.txt`, `/sitemap.xml`, canonical metadata, and JSON-LD.
 9. Run Lighthouse against the deployed domain.
