@@ -4,7 +4,7 @@
 
 BhoomiKonnect is a company-managed property, construction, interiors, renovation, maintenance, and materials marketplace. It uses Next.js App Router, TypeScript, Tailwind CSS, shadcn-style primitives, Framer Motion, and Supabase for authentication, PostgreSQL, storage, and the included operations CMS. Directus remains an optional CMS adapter.
 
-The repository includes original demo content only. No blog module is included by product choice.
+The repository includes optional fictional fixtures for local UI development. They are disabled by default and are never served in production. No blog module is included by product choice.
 
 ## Scripts
 
@@ -24,6 +24,8 @@ Create `.env.local` when connecting Supabase, optional Directus, or Google Maps:
 NEXT_PUBLIC_SITE_URL=https://bhoomikonnect.com
 NEXT_PUBLIC_PRIMARY_PHONE=
 NEXT_PUBLIC_WHATSAPP_NUMBER=
+NEXT_PUBLIC_CONTACT_EMAIL=
+NEXT_PUBLIC_OFFICE_ADDRESS=
 DIRECTUS_URL=
 NEXT_PUBLIC_DIRECTUS_URL=
 DIRECTUS_STATIC_TOKEN=
@@ -44,11 +46,11 @@ Never expose `SUPABASE_SERVICE_ROLE_KEY`, `DIRECTUS_STATIC_TOKEN`, or `RESEND_AP
 2. Copy `.env.example` to `.env.local` and enter your project values.
 3. Run `supabase/schema.sql` in a new Supabase project.
 4. Apply the SQL files in `supabase/migrations` in filename order.
-5. Optionally apply `supabase/seed.sql` for original demo records.
+5. For an isolated development database only, optionally apply `supabase/seed.sql` and set `ENABLE_DEMO_CONTENT=true`.
 6. Optionally connect Directus to the same PostgreSQL database and configure the collections in `directus/README.md`.
 7. Run `pnpm dev`.
 
-With the server-only Supabase key configured, production properties, CMS pages, and leads persist in Supabase. Without Supabase, local development can still use typed demo data.
+With the server-only Supabase key configured, production properties, developers, cities, services, providers, materials, current works, testimonials, CMS pages, and leads come from Supabase. Empty production tables render honest empty states instead of fictional records. Local fixtures require the explicit `ENABLE_DEMO_CONTENT=true` opt-in and remain disabled in production.
 
 ## CMS
 
@@ -89,7 +91,7 @@ Admin and dashboard routes require a valid Supabase session. Administrator acces
 
 The protected admin now includes operational property and page management:
 
-- `/admin/properties`: search, edit, preview, publish, and archive every property. Demo listings can be saved as local overrides.
+- `/admin/properties`: search, edit, preview, publish, and archive every property.
 - `/admin/properties/new`: multi-section property editor covering basic, location, pricing, specifications, legal, media, SEO, and publishing fields.
 - `/admin/pages`: manage reusable CMS pages and their publishing state.
 - `/admin/pages/new`: page builder with Hero, Text, Image, CTA, Statistics, FAQ, Gallery, and Contact sections.
@@ -129,11 +131,11 @@ React Hook Form and Zod power property submissions and quote forms. Every lead c
 
 Vercel is the recommended deployment target. Add the environment variables to the Vercel project, set the production site URL, and configure the Supabase OAuth callback as `https://your-domain/auth/callback`. Add a Directus asset host only when the optional adapter is enabled.
 
-Before launch, replace demo contact details, add legally reviewed policies, connect durable anti-spam/rate limiting, configure storage buckets, verify RLS in staging, and run Lighthouse against production assets.
+Before launch, obtain legal review for marketplace policies, connect durable anti-spam/rate limiting, configure storage buckets, verify RLS in staging, and run Lighthouse against production assets. Do not run `supabase/seed.sql` against production.
 
 ## Production gate
 
-`pnpm build` automatically validates required production configuration on Vercel and CI. Local builds skip the gate; run `pnpm check:production` to enforce it locally. The free launch check requires real HTTPS URLs, Supabase CMS/authentication, Resend email delivery, administrator recipients, and public contact details. Directus and Twilio are validated only when enabled. Placeholder domains and phone numbers are rejected, and secret values are never printed.
+`pnpm build` automatically validates required production configuration on Vercel and CI. Local builds skip the gate; run `pnpm check:production` to enforce it locally. The free launch check requires real HTTPS URLs, Supabase CMS/authentication, Resend email delivery, administrator recipients, and public contact details. Directus and Twilio are validated only when enabled. Placeholder domains, placeholder phone numbers, and production demo mode are rejected, and secret values are never printed.
 
 No development administrator, default password, password hint, local-session bypass, or public admin preview route is included. Production secrets belong only in the Vercel environment and must not be committed.
 

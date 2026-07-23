@@ -28,7 +28,7 @@ import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { publicContactLinks } from "@/lib/env";
+import { publicContactLinks, whatsappContactLink } from "@/lib/env";
 import { getDeveloperBySlug, getProperties, getPropertyBySlug, getRelatedProperties } from "@/lib/marketplace";
 import { breadcrumbSchema, createMetadata, faqSchema, propertySchema } from "@/lib/seo";
 import { cn, formatPrice } from "@/lib/utils";
@@ -282,7 +282,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
 
       <div className="mobile-sticky-actions sticky bottom-0 z-30 grid grid-cols-3 gap-2 border-t bg-background p-2 lg:hidden">
         <a href={publicContactLinks.phone} className={cn(buttonVariants({ variant: "outline" }))}><Phone className="size-4" aria-hidden /> Call</a>
-        <a href={`${publicContactLinks.whatsapp}?text=${encodeURIComponent(`I am interested in ${property.title}`)}`} className={cn(buttonVariants({ variant: "secondary" }))}><MessageCircle className="size-4" aria-hidden /> WhatsApp</a>
+        <a href={whatsappContactLink(`I am interested in ${property.title}`)} className={cn(buttonVariants({ variant: "secondary" }))}><MessageCircle className="size-4" aria-hidden /> WhatsApp</a>
         <a href="#property-enquiry" className={cn(buttonVariants())}>Enquire</a>
       </div>
 

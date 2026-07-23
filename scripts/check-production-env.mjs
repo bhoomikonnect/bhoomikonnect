@@ -7,6 +7,10 @@ if (!deploymentBuild) {
 }
 
 const errors = [];
+
+if (process.env.ENABLE_DEMO_CONTENT === "true") {
+  errors.push("ENABLE_DEMO_CONTENT must not be enabled for a production deployment");
+}
 const required = [
   "NEXT_PUBLIC_SITE_URL",
   "NEXT_PUBLIC_PRIMARY_PHONE",

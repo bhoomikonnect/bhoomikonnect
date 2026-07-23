@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Map, MapPin, TrendingUp } from "lucide-react";
+import { EmptyCatalogState } from "@/components/sections/EmptyCatalogState";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -23,6 +24,7 @@ export default async function CitiesPage() {
       <section className="border-b bg-muted/50 py-10 sm:py-14">
         <div className="container grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
           <SectionHeading
+            as="h1"
             eyebrow="Cities"
             title="Micro-market intelligence for India's growing property corridors."
             description="City hubs connect buyers to active listings, average pricing, growth indicators, and location-specific projects."
@@ -36,8 +38,8 @@ export default async function CitiesPage() {
       </section>
 
       <section className="py-10 sm:py-14">
-        <div className="container grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {cities.map((city) => {
+        <div className="container">
+          {cities.length ? <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{cities.map((city) => {
             const count = properties.filter((property) => property.location.city === city.name).length;
 
             return (
@@ -49,9 +51,9 @@ export default async function CitiesPage() {
                     </p>
                     <h2 className="mt-2 text-2xl font-bold">{city.name}</h2>
                   </div>
-                  <Badge variant="secondary">
+                  {city.growth && city.growth !== "+0%" ? <Badge variant="secondary">
                     <TrendingUp className="size-3" aria-hidden /> {city.growth}
-                  </Badge>
+                  </Badge> : null}
                 </div>
                 <div className="mt-5 flex flex-wrap gap-2">
                   {city.microMarkets.map((market) => (
@@ -67,7 +69,7 @@ export default async function CitiesPage() {
                   </span>
                   <span>
                     <span className="block text-xs text-muted-foreground">Active listings</span>
-                    <span className="font-bold">{count || city.activeListings}</span>
+                    <span className="font-bold">{count}</span>
                   </span>
                 </div>
                 <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary">
@@ -75,7 +77,7 @@ export default async function CitiesPage() {
                 </span>
               </Link>
             );
-          })}
+          })}</div> : <EmptyCatalogState title="City guides are being prepared" description="Location pages appear after local inventory and market details have been reviewed for publication." actionLabel="Tell us your preferred city" />}
         </div>
       </section>
     </>

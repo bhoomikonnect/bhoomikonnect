@@ -20,6 +20,7 @@ export default function ContactPage() {
       <section className="border-b bg-muted/50 py-10 sm:py-14">
         <div className="container">
           <SectionHeading
+            as="h1"
             eyebrow="Contact"
             title="Talk to BhoomiKonnect about property or home work."
             description="Send a property, construction, architecture, interior, painting, renovation, maintenance, material, or partnership enquiry."
@@ -34,7 +35,7 @@ export default function ContactPage() {
               { label: "Phone", value: siteConfig.phone, icon: Phone },
               { label: "Email", value: siteConfig.email, icon: Mail },
               { label: "Office", value: siteConfig.address, icon: MapPin }
-            ].map((item) => (
+            ].filter((item) => item.value).map((item) => (
               <Card key={item.label} className="p-5">
                 <item.icon className="size-5 text-primary" aria-hidden />
                 <p className="mt-4 text-sm text-muted-foreground">{item.label}</p>

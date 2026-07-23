@@ -51,6 +51,7 @@ export default function AboutPage() {
       <section className="border-b bg-muted/50 py-10 sm:py-14">
         <div className="container">
           <SectionHeading
+            as="h1"
             eyebrow="About"
             title="BhoomiKonnect connects every stage of the property journey."
             description="Our mission is to make buying, selling, building, designing, renovating, maintaining, and sourcing property work easier to understand and safer to coordinate."

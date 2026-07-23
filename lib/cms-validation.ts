@@ -29,6 +29,29 @@ export const cmsPropertySchema = z.object({
   og_image: trimmed, image_alt_text: z.string().trim().max(240),
   publishing_status: z.enum(["draft", "pending", "approved", "rejected", "published", "archived"]),
   featured: z.boolean(), verified: z.boolean(), active: z.boolean()
+}).superRefine((property, context) => {
+  if (property.publishing_status !== "published") return;
+
+  const requiredForPublication: Array<[keyof typeof property, string]> = [
+    ["cover_image", "Add a real cover image before publishing"],
+    ["image_alt_text", "Add accessible alt text for the primary image"],
+    ["seo_title", "Add a unique SEO title before publishing"],
+    ["meta_description", "Add a unique meta description before publishing"]
+  ];
+
+  requiredForPublication.forEach(([field, message]) => {
+    if (!String(property[field] || "").trim()) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: [field], message });
+    }
+  });
+
+  if (!property.verified) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["verified"],
+      message: "Complete verification before publishing"
+    });
+  }
 });
 
 const cmsPageSectionSchema = z.object({

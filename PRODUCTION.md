@@ -7,6 +7,7 @@ The repository contains no default administrator or committed secrets. Productio
 1. Create the production Supabase project.
 2. Run `supabase/schema.sql`.
 3. Apply every file in `supabase/migrations` in filename order.
+   Do not apply `supabase/seed.sql`; it is reserved for isolated local development.
 4. Create the first administrator through Supabase Auth.
 5. Promote the profile. This also creates it if the Auth user was added before the profile trigger:
 
@@ -69,6 +70,11 @@ Add these as production environment variables:
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
 NEXT_PUBLIC_PRIMARY_PHONE=+919876543210
 NEXT_PUBLIC_WHATSAPP_NUMBER=919876543210
+NEXT_PUBLIC_CONTACT_EMAIL=
+NEXT_PUBLIC_OFFICE_ADDRESS=
+NEXT_PUBLIC_LINKEDIN_URL=
+NEXT_PUBLIC_INSTAGRAM_URL=
+NEXT_PUBLIC_FACEBOOK_URL=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
@@ -99,6 +105,8 @@ Production Vercel builds enforce the environment gate automatically. Verify loca
 pnpm check:production
 ```
 
+Do not add `ENABLE_DEMO_CONTENT` to Vercel. Production repositories return only active, verified, published records from the configured CMS. Empty tables intentionally render empty states rather than fixture content.
+
 ## 6. Release Verification
 
 1. Run `pnpm typecheck`, `pnpm lint`, and `pnpm build`.
@@ -108,6 +116,7 @@ pnpm check:production
 5. Confirm admin and customer email show `sent`.
 6. If Twilio is enabled, confirm the applicable SMS delivery states.
 7. Test property/page publish, edit, preview, and archive.
-8. Verify `/robots.txt`, `/sitemap.xml`, canonical metadata, and JSON-LD.
-9. Run Lighthouse against the deployed domain.
-10. Rotate any key used during setup if it was shared outside the deployment secret manager.
+8. Confirm unfinished properties cannot publish without verification, a cover image, image alt text, an SEO title, and a meta description.
+9. Verify `/robots.txt`, `/sitemap.xml`, canonical metadata, and JSON-LD.
+10. Run Lighthouse against the deployed domain.
+11. Rotate any key used during setup if it was shared outside the deployment secret manager.

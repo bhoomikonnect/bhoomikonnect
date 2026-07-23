@@ -1,4 +1,5 @@
 import type { Property } from "@/types/marketplace";
+import { EmptyCatalogState } from "@/components/sections/EmptyCatalogState";
 import { PropertyCard } from "@/components/sections/PropertyCard";
 
 type ListingGridProps = {
@@ -8,10 +9,11 @@ type ListingGridProps = {
 export function ListingGrid({ properties }: ListingGridProps) {
   if (!properties.length) {
     return (
-      <div className="rounded-lg border bg-card p-8 text-center">
-        <h2 className="text-xl font-bold">No matching properties yet</h2>
-        <p className="mt-2 text-muted-foreground">Try a broader city, budget, or property type.</p>
-      </div>
+      <EmptyCatalogState
+        title="No verified properties published yet"
+        description="New listings are being reviewed before they appear here. Share your requirement and our team will contact you when a suitable property is available."
+        actionLabel="Share property requirement"
+      />
     );
   }
 

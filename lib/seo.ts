@@ -80,18 +80,14 @@ export function organizationSchema() {
     url: siteConfig.url,
     logo: absoluteUrl("/images/bhoomikonnect-hero.png"),
     slogan: siteConfig.tagline,
-    email: siteConfig.email,
-    telephone: siteConfig.phone,
-    address: {
+    ...(siteConfig.email ? { email: siteConfig.email } : {}),
+    ...(siteConfig.phone ? { telephone: siteConfig.phone } : {}),
+    ...(siteConfig.address ? { address: {
       "@type": "PostalAddress",
-      addressLocality: "Hyderabad",
-      addressRegion: "Telangana",
+      streetAddress: siteConfig.address,
       addressCountry: "IN"
-    },
-    sameAs: [
-      "https://www.linkedin.com/company/bhoomikonnect",
-      "https://www.instagram.com/bhoomikonnect"
-    ]
+    } } : {}),
+    sameAs: Object.values(siteConfig.socials).filter(Boolean)
   };
 }
 

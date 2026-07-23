@@ -28,11 +28,11 @@ function Field({ label, required, error, children, className }: { label: string;
   );
 }
 
-function Toggle({ checked, onChange, label, description }: { checked: boolean; onChange: (checked: boolean) => void; label: string; description?: string }) {
+function Toggle({ checked, onChange, label, description, error }: { checked: boolean; onChange: (checked: boolean) => void; label: string; description?: string; error?: string }) {
   return (
     <label className="flex min-h-14 cursor-pointer items-start gap-3 rounded-md border p-3">
       <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} className="mt-1 size-4 accent-primary" />
-      <span><span className="block text-sm font-semibold">{label}</span>{description ? <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{description}</span> : null}</span>
+      <span><span className="block text-sm font-semibold">{label}</span>{description ? <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{description}</span> : null}{error ? <span className="mt-1 block text-xs font-medium text-red-600">{error}</span> : null}</span>
     </label>
   );
 }
@@ -81,7 +81,8 @@ export function PropertyEditor({ initialValue, propertyId }: { initialValue: Cms
       const fieldTab: Record<string, Tab> = {
         title: "Basic", slug: "Basic", property_type: "Basic", project_name: "Basic", property_status: "Basic",
         country: "Location", state: "Location", city: "Location", address: "Location", latitude: "Location", longitude: "Location",
-        total_price: "Pricing", total_area: "Specifications", description: "Content & media", seo_title: "SEO", publishing_status: "Publishing"
+        total_price: "Pricing", total_area: "Specifications", description: "Content & media", cover_image: "Content & media",
+        seo_title: "SEO", meta_description: "SEO", image_alt_text: "SEO", publishing_status: "Publishing", verified: "Publishing"
       };
       if (firstKey && fieldTab[firstKey]) setActiveTab(fieldTab[firstKey]);
       setMessage("Please correct the marked fields before saving.");
@@ -181,7 +182,7 @@ export function PropertyEditor({ initialValue, propertyId }: { initialValue: Cms
           <Field label="Property description" required error={firstError("description")} className="md:col-span-2"><Textarea value={value.description} onChange={(event) => update("description", event.target.value)} className="min-h-40" /></Field>
           <Field label="Amenities"><Textarea value={lines(value.amenities)} onChange={(event) => update("amenities", parseLines(event.target.value))} /><span className="text-xs font-normal text-muted-foreground">One amenity per line.</span></Field>
           <Field label="Nearby places"><Textarea value={value.nearby.map((item) => `${item.label} | ${item.distance} | ${item.type}`).join("\n")} onChange={(event) => update("nearby", event.target.value.split("\n").map((row) => row.split("|").map((part) => part.trim())).filter(([label]) => label).map(([label, distance = "", type = "Business Hub"]) => ({ label, distance, type })))} /><span className="text-xs font-normal text-muted-foreground">Format: Place | Distance | Type</span></Field>
-          <Field label="Cover image path or URL"><Input value={value.cover_image} onChange={(event) => update("cover_image", event.target.value)} /></Field>
+          <Field label="Cover image path or URL" error={firstError("cover_image")}><Input value={value.cover_image} onChange={(event) => update("cover_image", event.target.value)} /></Field>
           <Field label="Gallery images"><Textarea value={lines(value.gallery)} onChange={(event) => update("gallery", parseLines(event.target.value))} /><span className="text-xs font-normal text-muted-foreground">One path or URL per line.</span></Field>
           <Field label="Floor-plan images"><Textarea value={lines(value.floor_plans)} onChange={(event) => update("floor_plans", parseLines(event.target.value))} /></Field>
           {([ ["layout_plan", "Layout plan"], ["master_plan", "Master plan"], ["brochure_url", "Brochure PDF"], ["video_url", "Video URL"], ["virtual_tour_url", "Virtual-tour URL"] ] as Array<[keyof CmsPropertyInput, string]>).map(([field, label]) => <Field key={field} label={label}><Input value={value[field] as string} onChange={(event) => update(field, event.target.value as never)} /></Field>)}
@@ -191,12 +192,12 @@ export function PropertyEditor({ initialValue, propertyId }: { initialValue: Cms
       {activeTab === "SEO" ? (
         <section className="grid gap-5 md:grid-cols-2" aria-labelledby="seo-fields">
           <div className="md:col-span-2"><h2 id="seo-fields" className="text-xl font-bold">Search metadata</h2><p className="mt-1 text-sm text-muted-foreground">Unique metadata, canonical URL, social image, keywords, and accessible image text.</p></div>
-          <Field label="SEO title"><Input value={value.seo_title} onChange={(event) => update("seo_title", event.target.value)} maxLength={160} /><span className="text-xs font-normal text-muted-foreground">{value.seo_title.length}/160</span></Field>
+          <Field label="SEO title" error={firstError("seo_title")}><Input value={value.seo_title} onChange={(event) => update("seo_title", event.target.value)} maxLength={160} /><span className="text-xs font-normal text-muted-foreground">{value.seo_title.length}/160</span></Field>
           <Field label="Canonical URL"><Input value={value.canonical_url} onChange={(event) => update("canonical_url", event.target.value)} /></Field>
-          <Field label="Meta description" className="md:col-span-2"><Textarea value={value.meta_description} onChange={(event) => update("meta_description", event.target.value)} maxLength={320} /><span className="text-xs font-normal text-muted-foreground">{value.meta_description.length}/320</span></Field>
+          <Field label="Meta description" error={firstError("meta_description")} className="md:col-span-2"><Textarea value={value.meta_description} onChange={(event) => update("meta_description", event.target.value)} maxLength={320} /><span className="text-xs font-normal text-muted-foreground">{value.meta_description.length}/320</span></Field>
           <Field label="Keywords"><Textarea value={lines(value.keywords)} onChange={(event) => update("keywords", parseLines(event.target.value))} /></Field>
           <Field label="Open Graph image"><Input value={value.og_image} onChange={(event) => update("og_image", event.target.value)} /></Field>
-          <Field label="Primary image alt text" className="md:col-span-2"><Input value={value.image_alt_text} onChange={(event) => update("image_alt_text", event.target.value)} /></Field>
+          <Field label="Primary image alt text" error={firstError("image_alt_text")} className="md:col-span-2"><Input value={value.image_alt_text} onChange={(event) => update("image_alt_text", event.target.value)} /></Field>
         </section>
       ) : null}
 
@@ -207,7 +208,7 @@ export function PropertyEditor({ initialValue, propertyId }: { initialValue: Cms
           <div className="hidden md:block" />
           <Toggle checked={value.active} onChange={(checked) => update("active", checked)} label="Active listing" description="The property can appear publicly only when active and published." />
           <Toggle checked={value.featured} onChange={(checked) => update("featured", checked)} label="Featured property" description="Prioritize the property in selected marketplace sections." />
-          <Toggle checked={value.verified} onChange={(checked) => update("verified", checked)} label="Verified property" description="Display the verified trust signal after checks are complete." />
+          <Toggle checked={value.verified} onChange={(checked) => update("verified", checked)} label="Verified property" description="Display the verified trust signal after checks are complete." error={firstError("verified")} />
         </section>
       ) : null}
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, ClipboardCheck, MapPin, ShieldCheck } from "lucide-react";
 import { QuoteForm } from "@/components/forms/QuoteForm";
+import { EmptyCatalogState } from "@/components/sections/EmptyCatalogState";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { ServiceCard } from "@/components/services/ServiceCard";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +28,7 @@ export async function ServiceHub({ family }: { family: ServiceFamily }) {
           <Link href="#quote" className={cn(buttonVariants({ variant: "accent", size: "lg" }))}>Get free quote <ArrowRight className="size-4" aria-hidden /></Link>
         </div>
       </section>
-      <section className="py-10 sm:py-14"><div className="container"><SectionHeading eyebrow={meta.eyebrow} title={`Choose the right ${meta.title.toLowerCase()} scope.`} description={`${services.length} original demo service pages are ready for CMS-managed pricing, packages, portfolios, locations, and FAQs.`} /><div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{services.map((service) => <ServiceCard key={service.id} service={service} />)}</div></div></section>
+      <section className="py-10 sm:py-14"><div className="container"><SectionHeading eyebrow={meta.eyebrow} title={`Choose the right ${meta.title.toLowerCase()} scope.`} description={services.length ? `${services.length} published service ${services.length === 1 ? "scope is" : "scopes are"} available with pricing, deliverables, service locations, and direct enquiry.` : "Service scopes are published only after pricing, deliverables, coverage, and provider availability have been reviewed."} /><div className="mt-8">{services.length ? <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{services.map((service) => <ServiceCard key={service.id} service={service} />)}</div> : <EmptyCatalogState title={`No published ${meta.title.toLowerCase()} yet`} description="Tell us what you need and the team will review your location, budget, and timeline before recommending the next step." href="#quote" actionLabel="Request a quote" />}</div></div></section>
       <section className="border-y bg-muted/55 py-10 sm:py-14"><div className="container grid gap-5 lg:grid-cols-3">{[
         [ShieldCheck, "Verified specialists", "Provider identity, portfolio, skills, and availability can be reviewed before assignment."],
         [ClipboardCheck, "Scope before price", "Requirements are documented before the team prepares a comparable quotation."],

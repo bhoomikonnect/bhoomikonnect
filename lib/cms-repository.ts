@@ -308,6 +308,7 @@ export async function getPublishedCmsPages() {
     return (await listCmsPages()).filter((page) => page.status === "published");
   } catch (error) {
     console.warn(error);
+    if (isDirectusConfigured() || isSupabaseAdminConfigured()) return [];
     return (await readLocalCmsStore()).pages.filter((page) => page.status === "published");
   }
 }

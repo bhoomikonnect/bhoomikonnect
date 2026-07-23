@@ -20,7 +20,7 @@ export function ListingPage({ eyebrow, title, description, properties }: Listing
       <section className="border-b bg-muted/50 py-10 sm:py-14">
         <div className="container">
           <div className="grid gap-8 lg:grid-cols-[1fr_0.92fr] lg:items-end">
-            <SectionHeading eyebrow={eyebrow} title={title} description={description} />
+            <SectionHeading as="h1" eyebrow={eyebrow} title={title} description={description} />
             <div className="rounded-lg border bg-card p-4 shadow-sm">
               <div className="flex flex-wrap gap-2">
                 {["City", "Area", "Type", "Budget", "Bedrooms", "Facing", "Approval", "RERA"].map((item) => (
@@ -52,7 +52,7 @@ export function ListingPage({ eyebrow, title, description, properties }: Listing
           </div>
           <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
             <div className="hidden lg:block"><FilterSidebar /></div>
-            <div><ListingGrid properties={properties} /><nav className="mt-8 flex justify-center gap-2" aria-label="Property result pages"><Button type="button" variant="outline" size="sm" disabled>Previous</Button><Button type="button" size="sm">1</Button><Button type="button" variant="outline" size="sm">2</Button><Button type="button" variant="outline" size="sm">Next</Button></nav></div>
+            <div><ListingGrid properties={properties} />{properties.length > 0 ? <nav className="mt-8 flex justify-center gap-2" aria-label="Property result pages"><Button type="button" variant="outline" size="sm" disabled>Previous</Button><Button type="button" size="sm">1</Button><Button type="button" variant="outline" size="sm">2</Button><Button type="button" variant="outline" size="sm">Next</Button></nav> : null}</div>
           </div>
         </div>
       </section>

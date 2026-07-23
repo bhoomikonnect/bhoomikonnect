@@ -41,7 +41,7 @@ const moduleLabels = [
   "Notifications", "Audit Logs"
 ];
 const moduleIcons = [Building2, ShieldCheck, MessageSquare, Users, FileImage, SearchCheck, BarChart3, Settings, LayoutDashboard, CheckCircle2];
-const modules = moduleLabels.map((label, index) => ({ label, icon: moduleIcons[index % moduleIcons.length], count: index < 9 ? String(8 + index * 7) : "Manage" }));
+const modules = moduleLabels.map((label, index) => ({ label, icon: moduleIcons[index % moduleIcons.length] }));
 
 export default async function AdminPage() {
   const [properties, leads] = await Promise.all([getProperties(), listLeads()]);
@@ -95,15 +95,16 @@ export default async function AdminPage() {
           <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
             <Card className="p-5">
               <h2 className="flex items-center gap-2 text-lg font-bold">
-                <LayoutDashboard className="size-5 text-primary" aria-hidden /> Modules
+                <LayoutDashboard className="size-5 text-primary" aria-hidden /> Data model
               </h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Available Supabase collections. Active editors are linked at the top of this dashboard.</p>
               <div className="mt-5 grid max-h-[620px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
                 {modules.map((module) => (
                   <div key={module.label} className="flex items-center justify-between gap-3 rounded-md bg-muted p-3">
                     <span className="flex items-center gap-2 text-sm font-semibold">
                       <module.icon className="size-4 text-primary" aria-hidden /> {module.label}
                     </span>
-                    <span className="text-xs text-muted-foreground">{module.count}</span>
+                    <span className="text-xs text-muted-foreground">Schema</span>
                   </div>
                 ))}
               </div>

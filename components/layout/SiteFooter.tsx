@@ -30,15 +30,15 @@ export function SiteFooter() {
             One trusted platform to buy, sell, build, design, renovate, and maintain property with verified professionals.
           </p>
           <div className="mt-6 grid gap-3 text-sm text-slate-300">
-            <span className="inline-flex items-center gap-2">
+            {siteConfig.phone ? <span className="inline-flex items-center gap-2">
               <Phone className="size-4" aria-hidden /> {siteConfig.phone}
-            </span>
-            <span className="inline-flex items-center gap-2">
+            </span> : null}
+            {siteConfig.email ? <span className="inline-flex items-center gap-2">
               <Mail className="size-4" aria-hidden /> {siteConfig.email}
-            </span>
-            <span className="inline-flex items-center gap-2">
+            </span> : null}
+            {siteConfig.address ? <span className="inline-flex items-center gap-2">
               <MapPin className="size-4" aria-hidden /> {siteConfig.address}
-            </span>
+            </span> : null}
           </div>
         </div>
 
@@ -62,17 +62,17 @@ export function SiteFooter() {
 
       <div className="border-t border-white/10">
         <div className="container flex flex-col gap-4 py-5 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} BhoomiKonnect. Original demo content and visuals. <Link href="/privacy" className="hover:text-white">Privacy</Link> · <Link href="/terms" className="hover:text-white">Terms</Link></p>
+          <p>© {new Date().getFullYear()} BhoomiKonnect. All rights reserved. <Link href="/privacy" className="hover:text-white">Privacy</Link> · <Link href="/terms" className="hover:text-white">Terms</Link></p>
           <div className="flex items-center gap-3">
-            <a href="https://linkedin.com" aria-label="LinkedIn" className="hover:text-white">
+            {siteConfig.socials.linkedin ? <a href={siteConfig.socials.linkedin} aria-label="LinkedIn" className="hover:text-white">
               <Linkedin className="size-4" aria-hidden />
-            </a>
-            <a href="https://instagram.com" aria-label="Instagram" className="hover:text-white">
+            </a> : null}
+            {siteConfig.socials.instagram ? <a href={siteConfig.socials.instagram} aria-label="Instagram" className="hover:text-white">
               <Instagram className="size-4" aria-hidden />
-            </a>
-            <a href="https://facebook.com" aria-label="Facebook" className="hover:text-white">
+            </a> : null}
+            {siteConfig.socials.facebook ? <a href={siteConfig.socials.facebook} aria-label="Facebook" className="hover:text-white">
               <Facebook className="size-4" aria-hidden />
-            </a>
+            </a> : null}
           </div>
         </div>
       </div>

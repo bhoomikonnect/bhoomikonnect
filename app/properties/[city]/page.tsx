@@ -19,5 +19,5 @@ export default async function CategoryPage({ params }: Props) {
   const types = categoryMap[params.city] || [];
   const properties = (await getProperties()).filter((property) => types.includes(property.propertyType));
   const title = params.city.replace(/-/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-  return <ListingPage eyebrow="Property category" title={`${title} on BhoomiKonnect`} description="Compare original demo inventory with pricing, approvals, location context, developer details, and direct lead actions." properties={properties} />;
+  return <ListingPage eyebrow="Property category" title={`${title} on BhoomiKonnect`} description="Compare published inventory with pricing, approvals, location context, developer details, and direct lead actions." properties={properties} />;
 }

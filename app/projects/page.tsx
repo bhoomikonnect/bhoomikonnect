@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CalendarDays, CheckCircle2, Clock, MapPin } from "lucide-react";
+import { EmptyCatalogState } from "@/components/sections/EmptyCatalogState";
 import { PropertyCard } from "@/components/sections/PropertyCard";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ export default async function ProjectsPage() {
       <section className="border-b bg-muted/50 py-10 sm:py-14">
         <div className="container grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
           <SectionHeading
+            as="h1"
             eyebrow="Projects"
             title="Track real estate projects by launch stage, city, and developer."
             description="A project-first directory for buyers who compare multiple communities before opening a direct conversation."
@@ -60,15 +62,15 @@ export default async function ProjectsPage() {
 
       <section className="py-10 sm:py-14">
         <div className="container">
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {properties.length ? <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {properties.map((property) => (
               <PropertyCard key={property.id} property={property} />
             ))}
-          </div>
+          </div> : <EmptyCatalogState title="No verified projects published yet" description="Projects appear after inventory, approvals, developer details, and enquiry ownership have been reviewed." actionLabel="Share your project requirement" />}
         </div>
       </section>
 
-      <section className="bg-slate-950 py-10 text-white sm:py-14">
+      {properties.length ? <section className="bg-slate-950 py-10 text-white sm:py-14">
         <div className="container">
           <SectionHeading
             eyebrow="Project timeline"
@@ -92,7 +94,7 @@ export default async function ProjectsPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> : null}
     </>
   );
 }

@@ -6,6 +6,7 @@ type SectionHeadingProps = {
   title: string;
   description?: string;
   align?: "left" | "center";
+  as?: "h1" | "h2" | "h3";
   className?: string;
 };
 
@@ -14,14 +15,15 @@ export function SectionHeading({
   title,
   description,
   align = "left",
+  as: Heading = "h2",
   className
 }: SectionHeadingProps) {
   return (
     <div className={cn("max-w-3xl", align === "center" && "mx-auto text-center", className)}>
       {eyebrow ? <Badge variant="accent">{eyebrow}</Badge> : null}
-      <h2 className="mt-3 text-balance text-3xl font-bold tracking-normal text-foreground sm:text-4xl">
+      <Heading className="mt-3 text-balance text-3xl font-bold tracking-normal text-foreground sm:text-4xl">
         {title}
-      </h2>
+      </Heading>
       {description ? <p className="mt-3 text-base leading-7 text-muted-foreground">{description}</p> : null}
     </div>
   );

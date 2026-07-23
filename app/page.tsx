@@ -8,11 +8,9 @@ import {
   Building2,
   DraftingCompass,
   Hammer,
-  CheckCircle2,
   CircleDollarSign,
   Compass,
   Home,
-  KeyRound,
   Landmark,
   Layers3,
   MapPin,
@@ -20,7 +18,6 @@ import {
   PackageOpen,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
   Users,
   Wrench
 } from "lucide-react";
@@ -30,19 +27,18 @@ import { JsonLd } from "@/components/JsonLd";
 import { Reveal } from "@/components/Reveal";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { DeveloperCard } from "@/components/sections/DeveloperCard";
+import { EmptyCatalogState } from "@/components/sections/EmptyCatalogState";
 import { FaqList } from "@/components/sections/FaqList";
-import { Newsletter } from "@/components/sections/Newsletter";
 import { PropertyCard } from "@/components/sections/PropertyCard";
 import { SearchPanel } from "@/components/sections/SearchPanel";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { platformFaqs, serviceFamilyMeta, testimonials } from "@/lib/catalog";
-import { getCurrentWorks, getServices } from "@/lib/content";
+import { platformFaqs, serviceFamilyMeta } from "@/lib/catalog";
+import { getCurrentWorks, getMaterials, getServices, getTestimonials } from "@/lib/content";
 import { getCities, getDevelopers, getProperties } from "@/lib/marketplace";
 import { createMetadata, faqSchema } from "@/lib/seo";
-import { cn, formatNumber } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
 
 export const metadata: Metadata = createMetadata({
   title: "BhoomiKonnect | Property, Construction and Home Services",
@@ -113,9 +109,21 @@ const serviceFamilies = [
 ] as const;
 
 export default async function HomePage() {
-  const [properties, cities, developers, services, works] = await Promise.all([getProperties(), getCities(), getDevelopers(), getServices(), getCurrentWorks()]);
+  const [properties, cities, developers, services, works, materials, testimonials] = await Promise.all([
+    getProperties(),
+    getCities(),
+    getDevelopers(),
+    getServices(),
+    getCurrentWorks(),
+    getMaterials(),
+    getTestimonials()
+  ]);
   const featuredProperties = properties.filter((property) => property.featuredProperty).slice(0, 6);
+  const propertyHighlights = featuredProperties.length ? featuredProperties : properties.slice(0, 6);
   const latestProjects = properties.slice(0, 4);
+  const publishedServiceFamilies = serviceFamilies.filter((item) =>
+    item.family === "materials" ? materials.length > 0 : services.some((service) => service.family === item.family)
+  );
 
   return (
     <>
@@ -131,7 +139,7 @@ export default async function HomePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-white via-white/86 to-white/34 dark:from-slate-950 dark:via-slate-950/86 dark:to-slate-950/35" />
         </div>
-        <div className="container relative grid min-h-[calc(100svh-7rem)] content-center gap-10 py-8 sm:py-12 lg:grid-cols-[1.08fr_0.62fr] lg:items-center">
+        <div className="container relative grid gap-10 py-8 sm:py-10 lg:grid-cols-[1.08fr_0.62fr] lg:items-center lg:py-12">
           <div className="min-w-0">
             <Reveal>
               <Badge variant="accent">
@@ -149,30 +157,16 @@ export default async function HomePage() {
               <SearchPanel />
             </Reveal>
 
-            <Reveal delay={0.18} className="mt-4 flex flex-wrap items-center gap-3 sm:mt-6">
-              <Link href="/buy" className={cn(buttonVariants({ size: "lg" }))}>
-                Buy Property <ArrowRight className="size-4" aria-hidden />
-              </Link>
-              <Link href="/sell-property" className={cn(buttonVariants({ variant: "outline", size: "lg" }))}>
-                Sell Property
-              </Link>
-              <Link href="/construction#quote" className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "hidden sm:inline-flex")}>
-                Construction Quote
-              </Link>
-              <Link href="/contact" className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "hidden sm:inline-flex")}>
-                Contact Us
-              </Link>
-            </Reveal>
           </div>
 
           <Reveal delay={0.14} className="hidden lg:block">
             <div className="grid gap-4 rounded-lg border bg-background/88 p-4 shadow-panel backdrop-blur-xl">
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: "Demo listings", value: `${properties.length}`, icon: CheckCircle2 },
-                  { label: "Service scopes", value: `${services.length}+`, icon: Users },
-                  { label: "Launch cities", value: `${cities.length}`, icon: MapPin },
-                  { label: "Lead categories", value: "15", icon: TrendingUp }
+                  { label: "Published listings", value: `${properties.length}`, icon: Building2 },
+                  { label: "Published services", value: `${services.length}`, icon: Users },
+                  { label: "Active cities", value: `${cities.length}`, icon: MapPin },
+                  { label: "Developer profiles", value: `${developers.length}`, icon: ShieldCheck }
                 ].map((stat) => (
                   <div key={stat.label} className="rounded-md bg-muted p-4">
                     <stat.icon className="size-5 text-primary" aria-hidden />
@@ -183,13 +177,10 @@ export default async function HomePage() {
               </div>
               <div className="rounded-md bg-slate-950 p-4 text-white">
                 <p className="inline-flex items-center gap-2 text-sm font-semibold text-amber-200">
-                  <KeyRound className="size-4" aria-hidden /> Trust Index
+                  <BadgeCheck className="size-4" aria-hidden /> Direct enquiry
                 </p>
-                <div className="mt-4 h-2 rounded-full bg-white/15">
-                  <div className="h-2 w-[92%] rounded-full bg-accent" />
-                </div>
                 <p className="mt-3 text-sm text-slate-300">
-                  Properties, professionals, suppliers, and service scopes carry their own verification and review context.
+                  Every published listing and service keeps contact ownership, review status, and lead routing visible to the operations team.
                 </p>
               </div>
             </div>
@@ -203,13 +194,13 @@ export default async function HomePage() {
             <SectionHeading
               eyebrow="Featured properties"
               title="Shortlist projects with the details buyers actually need."
-              description="Explore original demo listings with RERA data, amenities, developer profiles, nearby places, pricing, gallery, and direct lead actions."
+              description="Explore published listings with RERA data, amenities, developer profiles, nearby places, pricing, gallery, and direct lead actions."
             />
             <div className="grid grid-cols-3 gap-3 rounded-lg border bg-card p-4">
               {[
-                ["₹2.4K Cr", "demo GMV"],
-                [formatNumber(4820), "buyer enquiries"],
-                ["94%", "SEO health"]
+                [formatNumber(properties.length), "published listings"],
+                [formatNumber(developers.length), "developer profiles"],
+                [formatNumber(cities.length), "active cities"]
               ].map(([value, label]) => (
                 <div key={label} className="rounded-md bg-muted p-3 text-center">
                   <p className="text-xl font-bold">{value}</p>
@@ -219,27 +210,27 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {featuredProperties.map((property, index) => (
+          <div className="mt-8">
+            {propertyHighlights.length ? <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{propertyHighlights.map((property, index) => (
               <Reveal key={property.id} delay={index * 0.05}>
                 <PropertyCard property={property} />
               </Reveal>
-            ))}
+            ))}</div> : <EmptyCatalogState title="Verified property listings are coming soon" description="The first listings will appear after ownership, approvals, pricing, and contact details have been reviewed." actionLabel="Share your property requirement" />}
           </div>
         </div>
       </section>
 
-      <section className="border-y bg-muted/55 py-10 sm:py-14">
+      {publishedServiceFamilies.length ? <section className="border-y bg-muted/55 py-10 sm:py-14">
         <div className="container">
-          <SectionHeading eyebrow="Everything under one roof" title="Move from property search to finished home without losing context." description="Each service family has its own CMS-ready pages, packages, local coverage, provider matching, and lead workflow." />
+          <SectionHeading eyebrow="Everything under one roof" title="Move from property search to finished home without losing context." description="Compare reviewed service scopes, packages, local coverage, provider availability, and direct enquiry options." />
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {serviceFamilies.map((item) => {
+            {publishedServiceFamilies.map((item) => {
               const meta = item.family === "materials" ? { title: "Materials Supply", description: "Cement, steel, finishes, hardware, and site delivery quotations." } : serviceFamilyMeta[item.family];
               return <Link key={item.href} href={item.href} className="group rounded-lg border bg-card p-5 transition hover:-translate-y-1 hover:shadow-lift"><span className="grid size-11 place-items-center rounded-md bg-primary/10 text-primary"><item.icon className="size-5" aria-hidden /></span><h3 className="mt-4 text-lg font-bold">{meta.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{meta.description}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">Explore <ArrowRight className="size-4 transition group-hover:translate-x-1" aria-hidden /></span></Link>;
             })}
           </div>
         </div>
-      </section>
+      </section> : null}
 
       <section className="bg-muted/55 py-10 sm:py-14">
         <div className="container">
@@ -268,14 +259,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="py-10 sm:py-14">
+      {works.length ? <section className="py-10 sm:py-14">
         <div className="container">
           <SectionHeading eyebrow="Current works" title="Visible progress builds confidence." description="Follow ongoing and completed construction, interior, painting, and renovation work through milestone-ready pages." />
           <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">{works.slice(0, 4).map((work) => <Link key={work.id} href={`/current-works/${work.slug}`} className="overflow-hidden rounded-lg border bg-card"><div className="relative aspect-[16/10]"><Image src={work.image} alt={`${work.title} current work`} fill className="object-cover" /></div><div className="p-4"><p className="text-xs font-bold uppercase text-primary">{work.category} · {work.status}</p><h3 className="mt-2 font-bold">{work.title}</h3><div className="mt-4 h-2 rounded-full bg-muted"><div className="h-2 rounded-full bg-secondary" style={{ width: `${work.progress}%` }} /></div><p className="mt-2 text-xs text-muted-foreground">{work.progress}% complete</p></div></Link>)}</div>
         </div>
-      </section>
+      </section> : null}
 
-      <section className="py-10 sm:py-14">
+      {developers.length ? <section className="py-10 sm:py-14">
         <div className="container grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
           <SectionHeading
             eyebrow="Featured developers"
@@ -290,9 +281,9 @@ export default async function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> : null}
 
-      <section className="border-y bg-slate-950 py-10 text-white sm:py-14">
+      {latestProjects.length ? <section className="border-y bg-slate-950 py-10 text-white sm:py-14">
         <div className="container">
           <SectionHeading
             eyebrow="Latest projects"
@@ -315,9 +306,9 @@ export default async function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> : null}
 
-      <section className="py-10 sm:py-14">
+      {cities.length ? <section className="py-10 sm:py-14">
         <div className="container">
           <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
             <SectionHeading
@@ -333,21 +324,21 @@ export default async function HomePage() {
                       <p className="text-sm text-muted-foreground">{city.state}</p>
                       <h3 className="text-2xl font-bold">{city.name}</h3>
                     </div>
-                    <Badge variant="secondary">{city.growth}</Badge>
+                    {city.growth && city.growth !== "+0%" ? <Badge variant="secondary">{city.growth}</Badge> : null}
                   </div>
                   <p className="mt-4 text-sm text-muted-foreground">{city.microMarkets.join(" · ")}</p>
                   <div className="mt-5 flex items-center justify-between border-t pt-4 text-sm">
                     <span>{city.avgPrice}</span>
-                    <span className="font-semibold text-primary">{city.activeListings} listings</span>
+                    <span className="font-semibold text-primary">{properties.filter((property) => property.location.city === city.name).length} listings</span>
                   </div>
                 </Link>
               ))}
             </div>
           </div>
         </div>
-      </section>
+      </section> : null}
 
-      <section className="bg-muted/55 py-10 sm:py-14">
+      {properties.length >= 2 ? <section className="bg-muted/55 py-10 sm:py-14">
         <div className="container">
           <SectionHeading
             eyebrow="Compare properties"
@@ -358,7 +349,7 @@ export default async function HomePage() {
             <ComparisonTable />
           </div>
         </div>
-      </section>
+      </section> : null}
 
       <section className="py-10 sm:py-14"><div className="container"><SectionHeading eyebrow="Planning calculators" title="Estimate before you enquire." description="Explore home-loan EMI, construction cost, and common Indian property area conversions." /><div className="mt-8"><PropertyCalculators /></div></div></section>
 
@@ -385,7 +376,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="bg-muted/55 py-10 sm:py-14">
+      {testimonials.length ? <section className="bg-muted/55 py-10 sm:py-14">
         <div className="container grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
           <SectionHeading
             eyebrow="Buyer voices"
@@ -402,7 +393,7 @@ export default async function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> : null}
 
       <section className="py-10 sm:py-14">
         <div className="container grid gap-8 lg:grid-cols-[0.76fr_1.24fr]">
@@ -413,7 +404,6 @@ export default async function HomePage() {
 
       <section className="border-t bg-muted/45 py-10 sm:py-14"><div className="container grid gap-8 lg:grid-cols-[0.78fr_1.22fr]"><SectionHeading eyebrow="One enquiry, the right workflow" title="Tell us where your property journey stands." description="Buying, selling, construction, interiors, painting, renovation, maintenance, and material requests are classified and sent to the appropriate admin queue." /><QuoteForm title="How can BhoomiKonnect help?" leadType="General Contact" source="Homepage" /></div></section>
 
-      <Newsletter />
       <JsonLd data={faqSchema(platformFaqs)} />
     </>
   );

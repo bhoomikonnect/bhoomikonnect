@@ -4,13 +4,9 @@ import { directusAssetUrl, directusCreateItem, directusReadItems, directusUpdate
 import {
   cities as fallbackCities,
   developers as fallbackDevelopers,
-  getDeveloperBySlug as getFallbackDeveloperBySlug,
-  getPropertiesByDeveloper as getFallbackPropertiesByDeveloper,
-  getPropertiesByType as getFallbackPropertiesByType,
-  getPropertyBySlug as getFallbackPropertyBySlug,
-  getRelatedProperties as getFallbackRelatedProperties,
   properties as fallbackProperties
 } from "@/lib/data";
+import { isDemoContentEnabled } from "@/lib/demo";
 import { readLocalCmsStore, updateLocalCmsStore } from "@/lib/local-cms";
 import { createSupabaseAdminClient, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 import type { Category, City, Developer, NearbyPlace, Property, PropertyStatus, PropertyType, SaleType } from "@/types/marketplace";
@@ -278,20 +274,20 @@ export const getDevelopers = cache(async () => {
       const records = await directusReadItems<DirectusRecord>("developers", {
         fields: "*",
         "filter[active][_eq]": true,
+        "filter[verified][_eq]": true,
         sort: "name"
       });
 
       return records.map(mapDeveloper);
-    }, fallbackMarketplaceDevelopers);
+    }, []);
   }
 
   return safeSupabase(async () => {
     const supabase = createSupabaseAdminClient()!;
-    const { data, error } = await supabase.from("developers").select("*").eq("active", true).order("name");
+    const { data, error } = await supabase.from("developers").select("*").eq("active", true).eq("verified", true).order("name");
     if (error) throw error;
-    const developers = (data || []).map((record) => mapDeveloper(record as DirectusRecord));
-    return developers.length ? developers : fallbackMarketplaceDevelopers;
-  }, fallbackMarketplaceDevelopers);
+    return (data || []).map((record) => mapDeveloper(record as DirectusRecord));
+  }, isDemoContentEnabled() ? fallbackMarketplaceDevelopers : []);
 });
 
 export const getProperties = cache(async () => {
@@ -301,12 +297,14 @@ export const getProperties = cache(async () => {
         const records = await directusReadItems<DirectusRecord>("properties", {
           fields: "*,developer_id.id,developer_id.name,developer_id.slug",
           "filter[active][_eq]": true,
+          "filter[verified][_eq]": true,
+          "filter[publishing_status][_eq]": "published",
           sort: "-featured,title"
         });
 
         return records.map(mapProperty).filter((property) => property.active);
       },
-      fallbackMarketplaceProperties
+      []
     );
   }
 
@@ -317,23 +315,23 @@ export const getProperties = cache(async () => {
         .from("properties")
         .select("*,developer:developers(id,name,slug)")
         .eq("active", true)
+        .eq("verified", true)
         .eq("publishing_status", "published")
         .is("deleted_at", null)
         .order("featured", { ascending: false })
         .order("title", { ascending: true });
       if (error) throw error;
-      const properties = (data || []).map((record) => mapProperty(record as unknown as DirectusRecord)).filter((property) => property.active);
-      return properties.length ? properties : fallbackMarketplaceProperties;
-    }, fallbackMarketplaceProperties);
+      return (data || []).map((record) => mapProperty(record as unknown as DirectusRecord)).filter((property) => property.active);
+    }, []);
   }
 
   const store = await readLocalCmsStore();
   const localProperties = store.properties
-    .filter((property) => property.active && property.publishing_status === "published")
+    .filter((property) => property.active && property.verified && property.publishing_status === "published")
     .map((property) => mapProperty(property as unknown as DirectusRecord));
   const hidden = new Set(store.deleted_property_slugs);
   const merged = new Map(
-    fallbackMarketplaceProperties
+    (isDemoContentEnabled() ? fallbackMarketplaceProperties : [])
       .filter((property) => !hidden.has(property.slug))
       .map((property) => [property.slug, property])
   );
@@ -352,36 +350,35 @@ export const getCities = cache(async () => {
       });
 
       return records.map(mapCity);
-    }, fallbackCities);
+    }, []);
   }
 
   return safeSupabase(async () => {
     const supabase = createSupabaseAdminClient()!;
     const { data, error } = await supabase.from("cities").select("*").eq("active", true).order("name");
     if (error) throw error;
-    const cities = (data || []).map((record) => mapCity(record as DirectusRecord));
-    return cities.length ? cities : fallbackCities;
-  }, fallbackCities);
+    return (data || []).map((record) => mapCity(record as DirectusRecord));
+  }, isDemoContentEnabled() ? fallbackCities : []);
 });
 
 export async function getDeveloperBySlug(slug: string) {
   const developers = await getDevelopers();
-  return developers.find((developer) => developer.slug === slug) || getFallbackDeveloperBySlug(slug);
+  return developers.find((developer) => developer.slug === slug);
 }
 
 export async function getPropertyBySlug(slug: string) {
   const properties = await getProperties();
-  return properties.find((property) => property.slug === slug) || getFallbackPropertyBySlug(slug);
+  return properties.find((property) => property.slug === slug);
 }
 
 export async function getPropertiesByType(type: PropertyType) {
   const properties = await getProperties();
-  return properties.filter((property) => property.propertyType === type && property.active) || getFallbackPropertiesByType(type);
+  return properties.filter((property) => property.propertyType === type && property.active);
 }
 
 export async function getPropertiesByDeveloper(developerSlug: string) {
   const properties = await getProperties();
-  return properties.filter((property) => property.developerSlug === developerSlug && property.active) || getFallbackPropertiesByDeveloper(developerSlug);
+  return properties.filter((property) => property.developerSlug === developerSlug && property.active);
 }
 
 export async function getRelatedProperties(property: Property) {
@@ -395,7 +392,7 @@ export async function getRelatedProperties(property: Property) {
     )
     .slice(0, 3);
 
-  return related.length ? related : getFallbackRelatedProperties(property);
+  return related;
 }
 
 const skippedDelivery: LeadDeliveryStatus = {

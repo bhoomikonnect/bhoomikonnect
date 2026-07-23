@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Award, BadgeCheck, Building2, Users } from "lucide-react";
 import { DeveloperCard } from "@/components/sections/DeveloperCard";
+import { EmptyCatalogState } from "@/components/sections/EmptyCatalogState";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Card } from "@/components/ui/card";
 import { getDevelopers } from "@/lib/marketplace";
 import { createMetadata } from "@/lib/seo";
+import { formatNumber } from "@/lib/utils";
 
 export const metadata: Metadata = createMetadata({
   title: "Verified Real Estate Developers",
@@ -16,21 +18,25 @@ export const metadata: Metadata = createMetadata({
 
 export default async function DevelopersPage() {
   const developers = await getDevelopers();
+  const verifiedDevelopers = developers.filter((developer) => developer.verified).length;
+  const trackedProjects = developers.reduce((total, developer) => total + developer.completedProjects + developer.ongoingProjects + developer.upcomingProjects, 0);
+  const buyerReviews = developers.reduce((total, developer) => total + developer.reviews, 0);
 
   return (
     <>
       <section className="border-b bg-muted/50 py-10 sm:py-14">
         <div className="container grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
           <SectionHeading
+            as="h1"
             eyebrow="Developers"
             title="A trusted developer directory for serious property buyers."
             description="Each profile is designed for transparency: project count, company story, contact channels, ratings, and active listings."
           />
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              { label: "Verified partners", value: "86", icon: BadgeCheck },
-              { label: "Projects tracked", value: "312", icon: Building2 },
-              { label: "Buyer reviews", value: "9.8K", icon: Users }
+              { label: "Verified partners", value: formatNumber(verifiedDevelopers), icon: BadgeCheck },
+              { label: "Projects tracked", value: formatNumber(trackedProjects), icon: Building2 },
+              { label: "Buyer reviews", value: formatNumber(buyerReviews), icon: Users }
             ].map((metric) => (
               <Card key={metric.label} className="p-4">
                 <metric.icon className="size-5 text-primary" aria-hidden />
@@ -43,10 +49,10 @@ export default async function DevelopersPage() {
       </section>
 
       <section className="py-10 sm:py-14">
-        <div className="container grid gap-5 md:grid-cols-2">
-          {developers.map((developer) => (
+        <div className="container">
+          {developers.length ? <div className="grid gap-5 md:grid-cols-2">{developers.map((developer) => (
             <DeveloperCard key={developer.id} developer={developer} />
-          ))}
+          ))}</div> : <EmptyCatalogState title="Developer profiles are being verified" description="Only reviewed companies and project histories are published. Contact the team for help with a current requirement." actionLabel="Contact the property team" />}
         </div>
       </section>
 

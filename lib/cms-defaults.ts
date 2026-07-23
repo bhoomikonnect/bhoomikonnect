@@ -12,7 +12,7 @@ export function createEmptyProperty(): CmsPropertyInput {
     facing: "East", road_width: "", furnishing: "Unfurnished", property_age: "New", construction_status: "Under Construction", possession_date: "",
     rera_number: "", dtcp_approval: false, hmda_approval: false, municipality_approval: false, panchayat_approval: false,
     legal_verification: false, bank_loan_available: false, approvals: [], description: "", amenities: [], nearby: [],
-    cover_image: "/images/properties/apartment-grove.png", gallery: [], floor_plans: [], layout_plan: "", master_plan: "",
+    cover_image: "", gallery: [], floor_plans: [], layout_plan: "", master_plan: "",
     brochure_url: "", video_url: "", virtual_tour_url: "", seo_title: "", meta_description: "", keywords: [],
     canonical_url: "", og_image: "", image_alt_text: "", publishing_status: "draft", featured: false, verified: false, active: true
   };

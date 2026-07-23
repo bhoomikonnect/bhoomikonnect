@@ -7,9 +7,14 @@ export const siteConfig = {
     "Buy, sell, build, design, renovate, and maintain property with verified developers, professionals, and suppliers on BhoomiKonnect.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://bhoomikonnect.com",
   ogImage: "/images/bhoomikonnect-hero.png",
-  phone: process.env.NEXT_PUBLIC_PRIMARY_PHONE || "+91 90000 00000",
-  email: "hello@bhoomikonnect.com",
-  address: "Hyderabad, Telangana, India"
+  phone: process.env.NEXT_PUBLIC_PRIMARY_PHONE || "",
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "",
+  address: process.env.NEXT_PUBLIC_OFFICE_ADDRESS || "",
+  socials: {
+    linkedin: process.env.NEXT_PUBLIC_LINKEDIN_URL || "",
+    instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "",
+    facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || ""
+  }
 };
 
 export const navItems = [
