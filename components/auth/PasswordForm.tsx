@@ -13,7 +13,9 @@ export function PasswordForm({ mode }: { mode: "request" | "reset" }) {
     const form = new FormData(event.currentTarget); const supabase = createClient();
     if (!supabase) { setMessage("Supabase is not configured."); setLoading(false); return; }
     const result = mode === "request"
-      ? await supabase.auth.resetPasswordForEmail(String(form.get("email")), { redirectTo: `${window.location.origin}/reset-password` })
+      ? await supabase.auth.resetPasswordForEmail(String(form.get("email")), {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/reset-password")}`
+        })
       : await supabase.auth.updateUser({ password: String(form.get("password")) });
     setMessage(result.error ? result.error.message : mode === "request" ? "Password reset link sent." : "Password updated. You can now sign in."); setLoading(false);
   }

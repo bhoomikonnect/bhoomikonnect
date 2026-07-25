@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Building2, FileText, LayoutDashboard, ListChecks, MessageSquare } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { Building2, FileText, LayoutDashboard, ListChecks, LogOut, MessageSquare, Wrench } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/properties", label: "Properties", icon: Building2 },
+  { href: "/admin/services", label: "Services", icon: Wrench },
   { href: "/admin/pages", label: "Pages", icon: FileText },
   { href: "/admin/leads", label: "Leads", icon: MessageSquare },
   { href: "/admin#fields", label: "Field reference", icon: ListChecks, exact: true }
@@ -15,6 +19,16 @@ const links = [
 
 export function AdminNavigation() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function signOut() {
+    setSigningOut(true);
+    const supabase = createClient();
+    if (supabase) await supabase.auth.signOut();
+    router.replace("/login");
+    router.refresh();
+  }
 
   return (
     <nav className="border-b bg-background" aria-label="CMS navigation">
@@ -34,6 +48,9 @@ export function AdminNavigation() {
             </Link>
           );
         })}
+        <Button type="button" variant="ghost" onClick={signOut} disabled={signingOut} className="ml-auto shrink-0 text-muted-foreground">
+          <LogOut className="size-4" aria-hidden /> {signingOut ? "Signing out..." : "Logout"}
+        </Button>
       </div>
     </nav>
   );

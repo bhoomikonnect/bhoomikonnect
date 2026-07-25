@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, FilePlus2, UserRound } from "lucide-react";
+import { FilePlus2, UserRound } from "lucide-react";
+import { DesktopServicesMenu } from "@/components/layout/DesktopServicesMenu";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { buttonVariants } from "@/components/ui/button";
-import { navItems, serviceNavItems, siteConfig } from "@/lib/site";
+import { navItems, siteConfig } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export function SiteHeader() {
@@ -26,23 +27,7 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <details className="group relative">
-            <summary className="flex cursor-pointer list-none items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground">
-              Services <ChevronDown className="size-3 transition group-open:rotate-180" aria-hidden />
-            </summary>
-            <div className="absolute right-0 top-12 grid w-[520px] grid-cols-2 gap-1 rounded-lg border bg-background p-3 shadow-panel">
-              {serviceNavItems.map((item) => (
-                <Link key={item.href} href={item.href} className="rounded-md px-3 py-3 text-sm font-semibold hover:bg-muted hover:text-primary">
-                  {item.label}
-                </Link>
-              ))}
-              {navItems.slice(5).map((item) => (
-                <Link key={item.href} href={item.href} className="rounded-md px-3 py-3 text-sm font-semibold hover:bg-muted hover:text-primary">
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </details>
+          <DesktopServicesMenu />
         </nav>
 
         <div className="flex items-center gap-2">

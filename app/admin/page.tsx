@@ -14,7 +14,8 @@ import {
   ShieldCheck,
   Users,
   Plus,
-  FileText
+  FileText,
+  Wrench
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -76,6 +77,7 @@ export default async function AdminPage() {
           <div className="flex flex-wrap gap-2">
             <Link href="/admin/properties/new" className="inline-flex min-h-10 items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"><Plus className="size-4" aria-hidden /> Add property</Link>
             <Link href="/admin/pages/new" className="inline-flex min-h-10 items-center gap-2 rounded-md bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground"><FileText className="size-4" aria-hidden /> Add page</Link>
+            <Link href="/admin/services/new" className="inline-flex min-h-10 items-center gap-2 rounded-md bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground"><Wrench className="size-4" aria-hidden /> Add service</Link>
             <Link href="/admin/properties" className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"><Building2 className="size-4" aria-hidden /> Manage properties</Link>
             <Link href="/admin/pages" className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"><LayoutDashboard className="size-4" aria-hidden /> Manage pages</Link>
             <Link href="/admin/leads" className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"><MessageSquare className="size-4" aria-hidden /> Open lead inbox</Link>
