@@ -42,7 +42,7 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
             <div className="rounded-md bg-white/92 px-3 py-2 text-slate-950 shadow-sm backdrop-blur">
               <p className="text-xs font-semibold text-slate-500">Starting from</p>
-              <p className="text-lg font-bold">{formatPrice(property.price)}</p>
+              <p className="text-lg font-bold">{property.price > 0 ? formatPrice(property.price) : "On request"}</p>
             </div>
             <span className="grid size-10 place-items-center rounded-md bg-primary text-white shadow-sm">
               <ArrowUpRight className="size-4" aria-hidden />
@@ -73,7 +73,7 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
           </span>
           <span className="rounded-md bg-muted px-3 py-2">
             <Ruler className="mb-1 size-4 text-primary" aria-hidden />
-            {property.area} {property.areaUnit}
+            {property.area > 0 ? `${property.area} ${property.areaUnit}` : "On request"}
           </span>
           <span className="rounded-md bg-muted px-3 py-2">
             <BedDouble className="mb-1 size-4 text-primary" aria-hidden />

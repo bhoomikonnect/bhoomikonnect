@@ -47,8 +47,8 @@ export const publicEnv = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://bhoomikonnect.com",
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
   supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "",
-  phone: process.env.NEXT_PUBLIC_PRIMARY_PHONE || ""
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+91 90632 42304",
+  phone: process.env.NEXT_PUBLIC_PRIMARY_PHONE || "+91 90632 42304"
 };
 
 export const publicContactLinks = {

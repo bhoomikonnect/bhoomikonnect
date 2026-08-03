@@ -17,8 +17,8 @@ function leadRows(lead: LeadPayload) {
     ["Lead type", lead.leadType || "General Contact"], ["Name", lead.name], ["Phone", lead.phone],
     ["WhatsApp", lead.whatsapp || "Not provided"], ["Email", lead.email || "Not provided"],
     ["City / location", lead.city || "Not provided"], ["Budget", lead.budget || "Not provided"],
-    ["Preferred date", lead.preferredDate || "Not provided"], ["Related item", related],
-    ["Source", lead.source], ["Source page", lead.sourcePage || "Not provided"], ["Message", lead.message || "Not provided"]
+    ["Preferred date", lead.preferredDate || "Not provided"], ["Related project / service", related],
+    ["Lead source", lead.source], ["Originating page", lead.sourcePage || "Not provided"], ["Message", lead.message || "Not provided"]
   ];
   Object.entries(lead.metadata || {}).forEach(([key, value]) => rows.push([key.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase()), String(value ?? "")]));
   return rows;

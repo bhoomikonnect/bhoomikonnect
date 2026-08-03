@@ -54,7 +54,13 @@ export function LeadForm({
               ...Object.fromEntries(formData.entries()),
               source: submittedSource,
               leadType,
-              sourcePage: window.location.pathname
+              sourcePage: window.location.pathname,
+              metadata: {
+                pageTitle: document.title,
+                pageUrl: window.location.href,
+                referrer: document.referrer || "Direct visit",
+                enquiryContext: propertySlug ? `Property: ${propertySlug}` : developerSlug ? `Developer: ${developerSlug}` : title
+              }
             })
           });
           const result = (await response.json()) as { ok: boolean; message?: string };

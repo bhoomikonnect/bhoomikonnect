@@ -27,6 +27,7 @@ import { FaqList } from "@/components/sections/FaqList";
 import { PropertyCard } from "@/components/sections/PropertyCard";
 import { SearchPanel } from "@/components/sections/SearchPanel";
 import { SectionHeading } from "@/components/sections/SectionHeading";
+import { FeaturedLaunches } from "@/components/sections/FeaturedLaunches";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { platformFaqs, serviceFamilyMeta } from "@/lib/catalog";
@@ -145,6 +146,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <FeaturedLaunches />
 
       <section className="py-10 sm:py-14">
         <div className="container">

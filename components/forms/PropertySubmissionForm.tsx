@@ -30,23 +30,29 @@ export function PropertySubmissionForm() {
 
   async function submit(values: Values) {
     setServerError("");
-    const response = await fetch("/api/leads", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: values.name, phone: values.phone, whatsapp: values.whatsapp, email: values.email,
-        message: values.description, source: "Sell Property Form", leadType: "Property Sale Request",
-        city: values.location, budget: values.expectedPrice, consent: values.consent,
-        sourcePage: window.location.pathname, website: "",
-        metadata: {
-          propertyType: values.propertyType, listingPurpose: values.listingPurpose, size: values.size,
-          approvalStatus: values.approvalStatus, preferredCallbackTime: values.preferredCallbackTime
-        }
-      })
-    });
-    const result = await response.json();
-    if (!response.ok) return setServerError(result.message || "Unable to submit the property.");
-    setDone(true);
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: values.name, phone: values.phone, whatsapp: values.whatsapp, email: values.email,
+          message: values.description, source: "Sell Property Form", leadType: "Property Sale Request",
+          city: values.location, budget: values.expectedPrice, consent: values.consent,
+          sourcePage: window.location.pathname, website: "",
+          metadata: {
+            propertyType: values.propertyType, listingPurpose: values.listingPurpose, size: values.size,
+            approvalStatus: values.approvalStatus, preferredCallbackTime: values.preferredCallbackTime,
+            pageTitle: document.title, pageUrl: window.location.href,
+            referrer: document.referrer || "Direct visit", enquiryContext: "Sell Property Form"
+          }
+        })
+      });
+      const result = await response.json() as { ok?: boolean; message?: string };
+      if (!response.ok || !result.ok) throw new Error(result.message || "Unable to submit the property.");
+      setDone(true);
+    } catch (error) {
+      setServerError(error instanceof Error ? error.message : "Unable to submit the property. Please try again.");
+    }
   }
 
   if (done) return <div className="rounded-lg border bg-secondary/10 p-8"><CheckCircle2 className="size-10 text-secondary" aria-hidden /><h2 className="mt-4 text-2xl font-bold">Property submitted for review</h2><p className="mt-2 text-muted-foreground">The admin team will validate the details before publishing or requesting documents.</p></div>;

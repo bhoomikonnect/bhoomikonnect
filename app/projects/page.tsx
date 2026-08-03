@@ -4,6 +4,8 @@ import { ArrowRight, CalendarDays, CheckCircle2, Clock, MapPin } from "lucide-re
 import { EmptyCatalogState } from "@/components/sections/EmptyCatalogState";
 import { PropertyCard } from "@/components/sections/PropertyCard";
 import { SectionHeading } from "@/components/sections/SectionHeading";
+import { FeaturedLaunches } from "@/components/sections/FeaturedLaunches";
+import { featuredLaunches } from "@/lib/featured-launches";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { getProperties } from "@/lib/marketplace";
@@ -36,7 +38,9 @@ const statusCards = [
 ];
 
 export default async function ProjectsPage() {
-  const properties = await getProperties();
+  const catalogProperties = await getProperties();
+  const featuredSlugs = new Set(featuredLaunches.map((project) => project.slug));
+  const properties = [...featuredLaunches, ...catalogProperties.filter((project) => !featuredSlugs.has(project.slug))];
 
   return (
     <>
@@ -59,6 +63,8 @@ export default async function ProjectsPage() {
           </div>
         </div>
       </section>
+
+      <FeaturedLaunches compact />
 
       <section className="py-10 sm:py-14">
         <div className="container">

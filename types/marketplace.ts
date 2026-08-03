@@ -60,6 +60,7 @@ export type Property = {
   floorPlans: string[];
   videoUrl?: string;
   brochureUrl?: string;
+  documents?: Array<{ label: string; url: string }>;
   seoTitle: string;
   metaDescription: string;
   keywords: string[];

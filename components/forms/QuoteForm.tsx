@@ -40,26 +40,33 @@ export function QuoteForm({
 
   async function submit(values: QuoteValues) {
     setServerError("");
-    const response = await fetch("/api/leads", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...values,
-        leadType,
-        source,
-        serviceSlug,
-        providerSlug,
-        materialSlug,
-        sourcePage: window.location.pathname,
-        website: ""
-      })
-    });
-    const result = await response.json();
-    if (!response.ok) {
-      setServerError(result.message || "Unable to send the request.");
-      return;
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...values,
+          leadType,
+          source,
+          serviceSlug,
+          providerSlug,
+          materialSlug,
+          sourcePage: window.location.pathname,
+          metadata: {
+            pageTitle: document.title,
+            pageUrl: window.location.href,
+            referrer: document.referrer || "Direct visit",
+            enquiryContext: serviceSlug ? `Service: ${serviceSlug}` : providerSlug ? `Provider: ${providerSlug}` : materialSlug ? `Material: ${materialSlug}` : title
+          },
+          website: ""
+        })
+      });
+      const result = await response.json() as { ok?: boolean; message?: string };
+      if (!response.ok || !result.ok) throw new Error(result.message || "Unable to send the request.");
+      setSubmitted(true);
+    } catch (error) {
+      setServerError(error instanceof Error ? error.message : "Unable to send the request. Please try again.");
     }
-    setSubmitted(true);
   }
 
   if (submitted) {

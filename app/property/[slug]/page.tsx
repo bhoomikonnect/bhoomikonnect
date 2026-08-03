@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -28,10 +27,12 @@ import { SectionHeading } from "@/components/sections/SectionHeading";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { MediaGallery } from "@/components/ui/MediaGallery";
 import { publicContactLinks, whatsappContactLink } from "@/lib/env";
 import { getDeveloperBySlug, getProperties, getPropertyBySlug, getRelatedProperties } from "@/lib/marketplace";
 import { breadcrumbSchema, createMetadata, faqSchema, propertySchema } from "@/lib/seo";
 import { cn, formatPrice } from "@/lib/utils";
+import { featuredLaunches } from "@/lib/featured-launches";
 
 type PropertyPageProps = {
   params: {
@@ -41,8 +42,9 @@ type PropertyPageProps = {
 
 export async function generateStaticParams() {
   const properties = await getProperties();
+  const slugs = new Set(properties.map((property) => property.slug));
 
-  return properties.map((property) => ({
+  return [...properties, ...featuredLaunches.filter((property) => !slugs.has(property.slug))].map((property) => ({
     slug: property.slug
   }));
 }
@@ -77,10 +79,13 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
 
   const developer = await getDeveloperBySlug(property.developerSlug);
   const related = await getRelatedProperties(property);
+  const hasProposedApproval = property.approvals.some((approval) => approval.toLowerCase().includes("proposed"));
   const faqs = [
     {
-      question: `Is ${property.projectName} RERA approved?`,
-      answer: `Yes. The listing includes RERA number ${property.reraNumber} and approval details: ${property.approvals.join(", ")}.`
+      question: `What is the approval status of ${property.projectName}?`,
+      answer: hasProposedApproval
+        ? `${property.projectName} is presented as a proposed approval project. Current details: ${property.approvals.join(", ")}. Buyers should verify final approval and registration documents before booking.`
+        : `${property.projectName} lists RERA number ${property.reraNumber} and approval details: ${property.approvals.join(", ")}. Buyers should independently verify the current documents before booking.`
     },
     {
       question: `What is the possession timeline for ${property.projectName}?`,
@@ -131,23 +136,12 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
       <section className="py-8">
         <div className="container grid gap-8 lg:grid-cols-[1fr_360px]">
           <div className="space-y-8">
-            <div className="grid gap-3 md:grid-cols-[1.4fr_0.8fr]">
-              <div className="relative aspect-[16/10] overflow-hidden rounded-lg">
-                <Image src={property.gallery[0]} alt={`${property.title} main gallery`} fill priority sizes="(min-width: 1024px) 66vw, 100vw" className="object-cover" />
-              </div>
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
-                {property.gallery.slice(1, 3).map((image, index) => (
-                  <div key={image} className="relative aspect-[16/10] overflow-hidden rounded-lg">
-                    <Image src={image} alt={`${property.title} gallery ${index + 2}`} fill sizes="(min-width: 1024px) 24vw, 50vw" className="object-cover" />
-                  </div>
-                ))}
-              </div>
-            </div>
+            <MediaGallery images={property.gallery} title={property.title} />
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { label: "Price", value: formatPrice(property.price), icon: IndianRupee },
-                { label: "Area", value: `${property.area} ${property.areaUnit}`, icon: Maximize2 },
+                { label: "Price", value: property.price > 0 ? formatPrice(property.price) : "On request", icon: IndianRupee },
+                { label: "Area", value: property.area > 0 ? `${property.area} ${property.areaUnit}` : "On request", icon: Maximize2 },
                 { label: "Possession", value: property.possessionDate, icon: CalendarClock },
                 { label: "Parking", value: property.parking, icon: ParkingCircle }
               ].map((item) => (
@@ -166,8 +160,8 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                 {[
                   ["Project name", property.projectName],
                   ["Sale/Rent", property.saleType],
-                  ["Price per sq.ft", `₹${property.pricePerSqFt.toLocaleString("en-IN")}`],
-                  ["Booking amount", formatPrice(property.bookingAmount)],
+                  ["Price", property.pricePerSqFt > 0 ? `₹${property.pricePerSqFt.toLocaleString("en-IN")} per sq.ft` : "Available on request"],
+                  ["Booking amount", property.bookingAmount > 0 ? formatPrice(property.bookingAmount) : "Available on request"],
                   ["Facing", property.facing],
                   ["Road width", property.roadWidth],
                   ["Bedrooms", property.bedrooms ? `${property.bedrooms}` : "Flexible"],
@@ -196,15 +190,11 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h2 className="text-2xl font-bold">Floor Plans and Media</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">Plans, brochure, video, and virtual-tour actions are ready for Supabase Storage assets.</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Review supplied plans, documents, pricing material and project video. Current terms remain subject to confirmation.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button className={cn(buttonVariants({ variant: "outline", size: "sm" }))} type="button">
-                    <Video className="size-4" aria-hidden /> Video
-                  </button>
-                  <button className={cn(buttonVariants({ variant: "outline", size: "sm" }))} type="button">
-                    <Download className="size-4" aria-hidden /> Brochure
-                  </button>
+                  {property.videoUrl ? <a href="#project-video" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}><Video className="size-4" aria-hidden /> Video</a> : null}
+                  {property.brochureUrl ? <a href={property.brochureUrl} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}><Download className="size-4" aria-hidden /> Brochure / document</a> : null}
                 </div>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -215,6 +205,8 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                   </div>
                 ))}
               </div>
+              {property.documents?.length ? <div className="mt-5 flex flex-wrap gap-2">{property.documents.map((document) => <a key={document.url} href={document.url} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}><FileText className="size-4" aria-hidden /> {document.label}</a>)}</div> : null}
+              {property.videoUrl ? <video id="project-video" controls playsInline preload="metadata" className="mt-5 max-h-[680px] w-full scroll-mt-24 rounded-lg bg-black"><source src={property.videoUrl} type="video/mp4" /></video> : null}
             </Card>
 
             <Card className="p-5">
@@ -268,8 +260,8 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
           <aside id="property-enquiry" className="scroll-mt-24 space-y-4 lg:sticky lg:top-24 lg:self-start">
             <Card className="p-5">
               <p className="text-sm text-muted-foreground">Starting price</p>
-              <p className="mt-1 text-3xl font-bold">{formatPrice(property.price)}</p>
-              <p className="mt-2 text-sm text-muted-foreground">₹{property.pricePerSqFt.toLocaleString("en-IN")} per sq.ft · Booking {formatPrice(property.bookingAmount)}</p>
+              <p className="mt-1 text-3xl font-bold">{property.price > 0 ? formatPrice(property.price) : "Price on request"}</p>
+              <p className="mt-2 text-sm text-muted-foreground">Contact us for current availability, pricing and site-visit slots.</p>
             </Card>
             <LeadForm
               source="Book Site Visit"

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ArrowRight, BadgeCheck, ClipboardCheck, MapPin, ShieldCheck } from "lucide-react";
 import { QuoteForm } from "@/components/forms/QuoteForm";
 import { EmptyCatalogState } from "@/components/sections/EmptyCatalogState";
@@ -17,7 +18,7 @@ const leadTypes: Record<ServiceFamily, string> = {
   painting: "Painting Enquiry", renovation: "Renovation Enquiry", maintenance: "Maintenance Booking"
 };
 
-export async function ServiceHub({ family }: { family: ServiceFamily }) {
+export async function ServiceHub({ family, featuredContent }: { family: ServiceFamily; featuredContent?: ReactNode }) {
   const services = await getServicesByFamily(family);
   const meta = serviceFamilyMeta[family];
   return (
@@ -28,6 +29,7 @@ export async function ServiceHub({ family }: { family: ServiceFamily }) {
           <Link href="#quote" className={cn(buttonVariants({ variant: "accent", size: "lg" }))}>Get free quote <ArrowRight className="size-4" aria-hidden /></Link>
         </div>
       </section>
+      {featuredContent}
       <section className="py-10 sm:py-14"><div className="container"><SectionHeading eyebrow={meta.eyebrow} title={`Choose the right ${meta.title.toLowerCase()} scope.`} description={services.length ? "Review available scopes, deliverables, service locations, and direct enquiry options." : "Tell us what you need and the team will review your location, budget, and timeline."} /><div className="mt-8">{services.length ? <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{services.map((service) => <ServiceCard key={service.id} service={service} />)}</div> : <EmptyCatalogState title={`Request ${meta.title.toLowerCase()}`} description="Detailed service packages will appear after they are reviewed. You can request a tailored quote now." href="#quote" actionLabel="Request a quote" />}</div></div></section>
       <section className="border-y bg-muted/55 py-10 sm:py-14"><div className="container grid gap-5 lg:grid-cols-3">{[
         [ShieldCheck, "Verified specialists", "Provider identity, portfolio, skills, and availability can be reviewed before assignment."],

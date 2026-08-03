@@ -7,7 +7,7 @@ export const siteConfig = {
     "Buy, sell, build, design, renovate, and maintain property with verified developers, professionals, and suppliers on BhoomiKonnect.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://bhoomikonnect.com",
   ogImage: "/images/bhoomikonnect-hero.png",
-  phone: process.env.NEXT_PUBLIC_PRIMARY_PHONE || "",
+  phone: process.env.NEXT_PUBLIC_PRIMARY_PHONE || "+91 90632 42304",
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "",
   address: process.env.NEXT_PUBLIC_OFFICE_ADDRESS || "",
   socials: {

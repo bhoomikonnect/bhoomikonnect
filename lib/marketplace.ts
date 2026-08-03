@@ -7,6 +7,8 @@ import {
   properties as fallbackProperties
 } from "@/lib/data";
 import { isDemoContentEnabled } from "@/lib/demo";
+import { eeshanyaDeveloper, getFeaturedLaunchBySlug } from "@/lib/featured-launches";
+import { getNewProjectDeveloper } from "@/lib/new-projects";
 import { readLocalCmsStore, updateLocalCmsStore } from "@/lib/local-cms";
 import { createSupabaseAdminClient, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 import type { Category, City, Developer, NearbyPlace, Property, PropertyStatus, PropertyType, SaleType } from "@/types/marketplace";
@@ -362,11 +364,16 @@ export const getCities = cache(async () => {
 });
 
 export async function getDeveloperBySlug(slug: string) {
+  if (slug === eeshanyaDeveloper.slug) return eeshanyaDeveloper;
+  const featuredDeveloper = getNewProjectDeveloper(slug);
+  if (featuredDeveloper) return featuredDeveloper;
   const developers = await getDevelopers();
   return developers.find((developer) => developer.slug === slug);
 }
 
 export async function getPropertyBySlug(slug: string) {
+  const featuredLaunch = getFeaturedLaunchBySlug(slug);
+  if (featuredLaunch) return featuredLaunch;
   const properties = await getProperties();
   return properties.find((property) => property.slug === slug);
 }
