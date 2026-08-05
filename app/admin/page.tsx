@@ -35,7 +35,7 @@ const moduleLabels = [
   "Properties", "Property Categories", "Property Types", "Projects", "Developers", "Property Owners",
   "Sell Property Requests", "Property Leads", "Site Visits", "Construction Services", "Architecture Services",
   "Interior Services", "Painting Services", "Renovation Services", "Maintenance Services", "Service Categories",
-  "Service Providers", "Service Bookings", "Service Leads", "Current Works", "Work Gallery", "Materials",
+  "Service Providers", "Service Bookings", "Service Leads", "Materials",
   "Material Suppliers", "Material Enquiries", "Users", "Cities", "Districts", "Areas", "Localities", "Amenities",
   "Approvals", "Testimonials", "Reviews", "FAQs", "Media Library", "Homepage Sections", "Pages", "Navigation",
   "Footer", "Calculator Settings", "SEO Settings", "Contact Settings", "Social Media", "Site Settings", "User Roles",
@@ -46,7 +46,7 @@ const modules = moduleLabels.map((label, index) => ({ label, icon: moduleIcons[i
 
 export default async function AdminPage() {
   const [properties, leads] = await Promise.all([getProperties(), listLeads()]);
-  const cmsUrl = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL;
+  const cmsUrl = process.env.WORDPRESS_URL || process.env.NEXT_PUBLIC_WORDPRESS_URL;
   const failedNotifications = leads.filter((lead) => lead.delivery.adminEmail === "failed" || lead.delivery.adminSms === "failed").length;
   const dashboardMetrics = [
     { label: "Public properties", value: String(properties.length), delta: "Live marketplace", tone: "teal" },
@@ -68,7 +68,7 @@ export default async function AdminPage() {
               Manage properties, developers, users, leads, media, SEO, analytics, security, and platform settings.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2"><Link href="/buy" className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-950">View marketplace</Link>{cmsUrl ? <Link href={cmsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-slate-950">Open Directus CMS</Link> : null}</div>
+          <div className="flex flex-wrap gap-2"><Link href="/buy" className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-950">View marketplace</Link>{cmsUrl ? <Link href={`${cmsUrl.replace(/\/$/, "")}/wp-admin/`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-slate-950">Open WordPress CMS</Link> : null}</div>
         </div>
       </section>
 

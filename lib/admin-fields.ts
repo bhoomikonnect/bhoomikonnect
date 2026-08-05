@@ -94,18 +94,6 @@ export const adminFieldModules: AdminFieldModule[] = [
     ]
   },
   {
-    id: "current-works",
-    label: "Current Works",
-    collections: ["current_works", "work_media", "project_updates"],
-    description: "Ongoing and completed project progress, galleries, videos, and customer visibility.",
-    sections: [
-      { label: "Project", fields: ["Project title", "Slug", "Category", "Location", "Customer-name visibility", "Description", "Related service", "Related property"] },
-      { label: "Progress", fields: ["Start date", "Expected completion", "Completion date", "Status", "Progress percentage"] },
-      { label: "Media", fields: ["Cover image", "Media type", "File", "Caption", "Progress stage", "Before photos", "Progress photos", "After photos", "Videos", "Display order"] },
-      { label: "Publishing", fields: ["Featured", "Active", "Created at", "Updated at"] }
-    ]
-  },
-  {
     id: "materials",
     label: "Materials",
     collections: ["materials", "material_categories", "material_suppliers", "material_enquiries"],

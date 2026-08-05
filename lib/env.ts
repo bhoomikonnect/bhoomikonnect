@@ -27,10 +27,11 @@ const serverEnvSchema = z.object({
   LEAD_SMS_TO: optionalString,
   SEND_CUSTOMER_CONFIRMATION_SMS: optionalString,
   ADMIN_EMAIL: z.preprocess((value) => value || undefined, z.string().email().optional()),
-  DIRECTUS_URL: optionalUrl,
-  NEXT_PUBLIC_DIRECTUS_URL: optionalUrl,
-  DIRECTUS_STATIC_TOKEN: optionalString,
-  DIRECTUS_CACHE_SECONDS: z.preprocess((value) => value || "60", z.coerce.number().int().min(0).max(86400))
+  WORDPRESS_URL: optionalUrl,
+  NEXT_PUBLIC_WORDPRESS_URL: optionalUrl,
+  WORDPRESS_USERNAME: optionalString,
+  WORDPRESS_APPLICATION_PASSWORD: optionalString,
+  WORDPRESS_CACHE_SECONDS: z.preprocess((value) => value || "60", z.coerce.number().int().min(0).max(86400))
 });
 
 export function getServerEnv() {

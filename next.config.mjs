@@ -1,19 +1,19 @@
-const directusUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || process.env.DIRECTUS_URL;
+const wordpressUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || process.env.WORDPRESS_URL;
 
-function getDirectusRemotePattern() {
-  if (!directusUrl) {
+function getWordPressRemotePattern() {
+  if (!wordpressUrl) {
     return [];
   }
 
   try {
-    const url = new URL(directusUrl);
+    const url = new URL(wordpressUrl);
 
     return [
       {
         protocol: url.protocol.replace(":", ""),
         hostname: url.hostname,
         port: url.port,
-        pathname: "/assets/**"
+        pathname: "/wp-content/uploads/**"
       }
     ];
   } catch {
@@ -26,7 +26,7 @@ const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,
-    remotePatterns: getDirectusRemotePattern()
+    remotePatterns: getWordPressRemotePattern()
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"]

@@ -1,12 +1,21 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, BadgeCheck, CheckCircle2, MapPin, Ruler, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, CheckCircle2, MapPin, Ruler, Sparkles } from "lucide-react";
+import { useRef } from "react";
 import { featuredLaunches } from "@/lib/featured-launches";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 
 export function FeaturedLaunches({ compact = false }: { compact?: boolean }) {
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  function move(direction: -1 | 1) {
+    carouselRef.current?.scrollBy({ left: direction * carouselRef.current.clientWidth, behavior: "smooth" });
+  }
+
   return (
     <section className="relative overflow-hidden bg-[#071c17] py-12 text-white sm:py-16">
       <div className="absolute inset-0 premium-grid opacity-20" />
@@ -25,19 +34,21 @@ export function FeaturedLaunches({ compact = false }: { compact?: boolean }) {
               Discover Eeshanya&apos;s plotted communities across Rajapur and Mogiligidda, shaped around highway access, planned infrastructure and long-term growth.
             </p>
           </div>
-          <div className="flex items-center gap-3 text-sm text-emerald-100/70">
-            <span className="h-px w-10 bg-amber-300/60" /> South Hyderabad growth belt
+          <div className="flex items-center gap-3">
+            <span className="hidden items-center gap-3 text-sm text-emerald-100/70 lg:flex"><span className="h-px w-10 bg-amber-300/60" /> Featured projects</span>
+            <button type="button" onClick={() => move(-1)} aria-label="Previous projects" className="grid size-11 place-items-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/15"><ArrowLeft className="size-5" /></button>
+            <button type="button" onClick={() => move(1)} aria-label="Next projects" className="grid size-11 place-items-center rounded-full bg-amber-300 text-slate-950 transition hover:bg-amber-200"><ArrowRight className="size-5" /></button>
           </div>
         </div>
 
-        <div className={cn("mt-9 grid gap-5", compact ? "lg:grid-cols-2" : "lg:grid-cols-2")}>
+        <div ref={carouselRef} className={cn("scrollbar-none mt-9 grid snap-x snap-mandatory grid-flow-col gap-5 overflow-x-auto overscroll-x-contain pb-2", compact ? "auto-cols-[100%] md:auto-cols-[calc(50%-0.625rem)]" : "auto-cols-[88%] sm:auto-cols-[calc(50%-0.625rem)] lg:auto-cols-[calc(33.333%-0.875rem)]")}>
           {featuredLaunches.map((project, index) => {
             const samruddhi = index === 0;
             const stats = samruddhi
               ? [["100+", "Acres vision"], ["1,500+", "Planned plots"], ["150", "Sq.yd onwards"]]
               : [["HMDA", "Approved"], ["RERA", "Registered"], ["201.66", "Sq.yd onwards"]];
             return (
-              <article key={project.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] shadow-2xl backdrop-blur-sm">
+              <article key={project.id} className="group snap-start overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] shadow-2xl backdrop-blur-sm">
                 <Link href={`/property/${project.slug}`} className="relative block aspect-[16/10] overflow-hidden bg-white">
                   <Image src={project.gallery[0]} alt={`${project.title} master layout`} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-contain p-2 transition duration-700 group-hover:scale-[1.03]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#071c17]/90 via-transparent to-transparent" />

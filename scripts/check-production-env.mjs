@@ -32,9 +32,12 @@ for (const name of required) {
   else if (placeholderPattern.test(value)) errors.push(`${name} still contains a placeholder value`);
 }
 
-const directusConfigured = Boolean(process.env.DIRECTUS_URL || process.env.DIRECTUS_STATIC_TOKEN);
-if (directusConfigured && (!process.env.DIRECTUS_URL || !process.env.DIRECTUS_STATIC_TOKEN)) {
-  errors.push("DIRECTUS_URL and DIRECTUS_STATIC_TOKEN must be configured together");
+const wordpressConfigured = Boolean(process.env.WORDPRESS_URL || process.env.WORDPRESS_USERNAME || process.env.WORDPRESS_APPLICATION_PASSWORD);
+if (wordpressConfigured && !process.env.WORDPRESS_URL) {
+  errors.push("WORDPRESS_URL is required when headless WordPress is enabled");
+}
+if (Boolean(process.env.WORDPRESS_USERNAME) !== Boolean(process.env.WORDPRESS_APPLICATION_PASSWORD)) {
+  errors.push("WORDPRESS_USERNAME and WORDPRESS_APPLICATION_PASSWORD must be configured together for CMS writes");
 }
 
 const twilioNames = [
@@ -54,7 +57,7 @@ if (twilioConfigured) {
   }
 }
 
-for (const name of ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_SUPABASE_URL", ...(process.env.DIRECTUS_URL ? ["DIRECTUS_URL"] : [])]) {
+for (const name of ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_SUPABASE_URL", ...(process.env.WORDPRESS_URL ? ["WORDPRESS_URL"] : [])]) {
   const value = process.env[name];
   if (value) {
     try {
@@ -77,8 +80,8 @@ if (smsRecipients.some((phone) => !/^\+[1-9]\d{7,14}$/.test(phone))) {
   errors.push("LEAD_SMS_TO numbers must use E.164 format, for example +919876543210");
 }
 
-if (!directusConfigured) {
-  console.log("Directus is not configured; using the included Supabase CMS repository.");
+if (!wordpressConfigured) {
+  console.log("WordPress is not configured; using the included Supabase CMS repository.");
 }
 if (!twilioConfigured) {
   console.log("Twilio is not configured; SMS delivery is disabled and email/WhatsApp remain active.");

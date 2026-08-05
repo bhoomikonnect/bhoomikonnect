@@ -17,23 +17,17 @@ import {
   Sparkles,
   Wrench
 } from "lucide-react";
-import { PropertyCalculators } from "@/components/calculators/PropertyCalculators";
-import { QuoteForm } from "@/components/forms/QuoteForm";
-import { JsonLd } from "@/components/JsonLd";
 import { Reveal } from "@/components/Reveal";
+import { QuoteForm } from "@/components/forms/QuoteForm";
 import { DeveloperCard } from "@/components/sections/DeveloperCard";
-import { EmptyCatalogState } from "@/components/sections/EmptyCatalogState";
-import { FaqList } from "@/components/sections/FaqList";
-import { PropertyCard } from "@/components/sections/PropertyCard";
-import { SearchPanel } from "@/components/sections/SearchPanel";
+import { RecentInteriorWork } from "@/components/sections/RecentInteriorWork";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { FeaturedLaunches } from "@/components/sections/FeaturedLaunches";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { platformFaqs, serviceFamilyMeta } from "@/lib/catalog";
-import { getCurrentWorks } from "@/lib/content";
-import { getDevelopers, getProperties } from "@/lib/marketplace";
-import { createMetadata, faqSchema } from "@/lib/seo";
+import { serviceFamilyMeta } from "@/lib/catalog";
+import { getDevelopers } from "@/lib/marketplace";
+import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
   title: "BhoomiKonnect | Property, Construction and Home Services",
@@ -104,13 +98,7 @@ const serviceFamilies = [
 ] as const;
 
 export default async function HomePage() {
-  const [properties, developers, works] = await Promise.all([
-    getProperties(),
-    getDevelopers(),
-    getCurrentWorks()
-  ]);
-  const featuredProperties = properties.filter((property) => property.featuredProperty).slice(0, 6);
-  const propertyHighlights = featuredProperties.length ? featuredProperties : properties.slice(0, 6);
+  const developers = await getDevelopers();
 
   return (
     <>
@@ -126,8 +114,9 @@ export default async function HomePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-white via-white/86 to-white/34 dark:from-slate-950 dark:via-slate-950/86 dark:to-slate-950/35" />
         </div>
-        <div className="container relative py-10 sm:py-14 lg:py-20">
-          <div className="min-w-0">
+        <div className="container relative py-10 sm:py-14 lg:py-16">
+          <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(390px,0.7fr)] lg:items-center xl:gap-12">
+            <div className="min-w-0">
             <Reveal>
               <Badge variant="accent">
                 <BadgeCheck className="size-3" aria-hidden /> BhoomiKonnect verified marketplace
@@ -138,10 +127,15 @@ export default async function HomePage() {
               <p className="mt-4 max-w-2xl text-base leading-7 text-slate-700 dark:text-slate-200 sm:mt-5 sm:text-lg sm:leading-8">
                 Discover verified properties, trusted developers, construction solutions, interiors, renovation, and complete home services through BhoomiKonnect.
               </p>
+              <div className="mt-6 flex flex-wrap gap-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                <span className="rounded-full border border-white/60 bg-white/75 px-4 py-2 shadow-sm backdrop-blur dark:border-white/15 dark:bg-slate-950/65">Verified properties</span>
+                <span className="rounded-full border border-white/60 bg-white/75 px-4 py-2 shadow-sm backdrop-blur dark:border-white/15 dark:bg-slate-950/65">Interior solutions</span>
+                <span className="rounded-full border border-white/60 bg-white/75 px-4 py-2 shadow-sm backdrop-blur dark:border-white/15 dark:bg-slate-950/65">Construction services</span>
+              </div>
             </Reveal>
-
-            <Reveal delay={0.1} className="mt-4 sm:mt-8">
-              <SearchPanel />
+            </div>
+            <Reveal delay={0.1} className="w-full lg:justify-self-end">
+              <QuoteForm title="Tell us what you're looking for" leadType="Property Enquiry" source="Homepage Hero" minimal />
             </Reveal>
           </div>
         </div>
@@ -149,25 +143,9 @@ export default async function HomePage() {
 
       <FeaturedLaunches />
 
-      <section className="py-10 sm:py-14">
-        <div className="container">
-          <SectionHeading
-            eyebrow="Featured properties"
-            title="Shortlist projects with the details buyers actually need."
-            description="Explore reviewed listings with approvals, amenities, pricing, location details, and direct enquiry actions."
-          />
+      <RecentInteriorWork />
 
-          <div className="mt-8">
-            {propertyHighlights.length ? <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{propertyHighlights.map((property, index) => (
-              <Reveal key={property.id} delay={index * 0.05}>
-                <PropertyCard property={property} />
-              </Reveal>
-            ))}</div> : <EmptyCatalogState title="Verified property listings are coming soon" description="The first listings will appear after ownership, approvals, pricing, and contact details have been reviewed." actionLabel="Share your property requirement" />}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y bg-muted/55 py-10 sm:py-14">
+      <section className="border-y border-emerald-900/10 bg-emerald-50/70 py-10 dark:border-emerald-200/10 dark:bg-emerald-950/20 sm:py-14">
         <div className="container">
           <SectionHeading eyebrow="Everything under one roof" title="Move from property search to finished home without losing context." description="Compare reviewed service scopes, packages, local coverage, provider availability, and direct enquiry options." />
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -179,7 +157,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="bg-muted/55 py-10 sm:py-14">
+      <section className="bg-background py-10 sm:py-14">
         <div className="container">
           <SectionHeading
             eyebrow="Property categories"
@@ -206,14 +184,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {works.length ? <section className="py-10 sm:py-14">
-        <div className="container">
-          <SectionHeading eyebrow="Current works" title="Visible progress builds confidence." description="Follow ongoing and completed construction, interior, painting, and renovation work through milestone-ready pages." />
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">{works.slice(0, 4).map((work) => <Link key={work.id} href={`/current-works/${work.slug}`} className="overflow-hidden rounded-lg border bg-card"><div className="relative aspect-[16/10]"><Image src={work.image} alt={`${work.title} current work`} fill className="object-cover" /></div><div className="p-4"><p className="text-xs font-bold uppercase text-primary">{work.category} · {work.status}</p><h3 className="mt-2 font-bold">{work.title}</h3><div className="mt-4 h-2 rounded-full bg-muted"><div className="h-2 rounded-full bg-secondary" style={{ width: `${work.progress}%` }} /></div><p className="mt-2 text-xs text-muted-foreground">{work.progress}% complete</p></div></Link>)}</div>
-        </div>
-      </section> : null}
-
-      {developers.length ? <section className="py-10 sm:py-14">
+      {developers.length ? <section className="border-y bg-muted/50 py-10 sm:py-14">
         <div className="container grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
           <SectionHeading
             eyebrow="Featured developers"
@@ -230,9 +201,7 @@ export default async function HomePage() {
         </div>
       </section> : null}
 
-      <section className="py-10 sm:py-14"><div className="container"><SectionHeading eyebrow="Planning calculators" title="Estimate before you enquire." description="Explore home-loan EMI, construction cost, and common Indian property area conversions." /><div className="mt-8"><PropertyCalculators /></div></div></section>
-
-      <section className="py-10 sm:py-14">
+      <section className="bg-[#fbfaf6] py-10 dark:bg-slate-950 sm:py-14">
         <div className="container">
           <SectionHeading
             eyebrow="Why BhoomiKonnect"
@@ -255,16 +224,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="py-10 sm:py-14">
-        <div className="container grid gap-8 lg:grid-cols-[0.76fr_1.24fr]">
-          <SectionHeading eyebrow="FAQ" title="Answers for buyers, owners, and service customers." />
-          <FaqList faqs={platformFaqs} />
-        </div>
-      </section>
-
-      <section className="border-t bg-muted/45 py-10 sm:py-14"><div className="container grid gap-8 lg:grid-cols-[0.78fr_1.22fr]"><SectionHeading eyebrow="One enquiry, the right workflow" title="Tell us where your property journey stands." description="Buying, selling, construction, interiors, painting, renovation, maintenance, and material requests are classified and sent to the appropriate admin queue." /><QuoteForm title="How can BhoomiKonnect help?" leadType="General Contact" source="Homepage" /></div></section>
-
-      <JsonLd data={faqSchema(platformFaqs)} />
     </>
   );
 }

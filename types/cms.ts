@@ -85,7 +85,7 @@ export type CmsPropertyRecord = CmsPropertyInput & {
   id: string;
   created_at: string;
   updated_at: string;
-  source?: "local" | "demo" | "directus" | "supabase";
+  source?: "local" | "demo" | "wordpress" | "supabase";
 };
 
 export type CmsSectionType = "hero" | "text" | "image" | "cta" | "statistics" | "faq" | "gallery" | "contact";
@@ -118,7 +118,7 @@ export type CmsPageRecord = CmsPageInput & {
   id: string;
   created_at: string;
   updated_at: string;
-  source?: "local" | "directus" | "supabase";
+  source?: "local" | "wordpress" | "supabase";
 };
 
 export type LocalCmsStore = {

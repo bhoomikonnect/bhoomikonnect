@@ -2,7 +2,7 @@
 
 **From Land to Dream Home — Everything Under One Roof**
 
-BhoomiKonnect is a company-managed property, construction, interiors, renovation, maintenance, and materials marketplace. It uses Next.js App Router, TypeScript, Tailwind CSS, shadcn-style primitives, Framer Motion, and Supabase for authentication, PostgreSQL, storage, and the included operations CMS. Directus remains an optional CMS adapter.
+BhoomiKonnect is a company-managed property, construction, interiors, renovation, maintenance, and materials marketplace. It uses Next.js App Router, TypeScript, Tailwind CSS, Framer Motion, Supabase, and an optional headless WordPress CMS.
 
 The repository includes optional fictional fixtures for local UI development. They are disabled by default and are never served in production. No blog module is included by product choice.
 
@@ -18,7 +18,7 @@ pnpm lint
 
 ## Environment
 
-Create `.env.local` when connecting Supabase, optional Directus, or Google Maps:
+Create `.env.local` when connecting Supabase, optional headless WordPress, or Google Maps:
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://bhoomikonnect.com
@@ -26,10 +26,11 @@ NEXT_PUBLIC_PRIMARY_PHONE=
 NEXT_PUBLIC_WHATSAPP_NUMBER=
 NEXT_PUBLIC_CONTACT_EMAIL=
 NEXT_PUBLIC_OFFICE_ADDRESS=
-DIRECTUS_URL=
-NEXT_PUBLIC_DIRECTUS_URL=
-DIRECTUS_STATIC_TOKEN=
-DIRECTUS_CACHE_SECONDS=60
+WORDPRESS_URL=https://cms.example.com
+NEXT_PUBLIC_WORDPRESS_URL=https://cms.example.com
+WORDPRESS_USERNAME=
+WORDPRESS_APPLICATION_PASSWORD=
+WORDPRESS_CACHE_SECONDS=60
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
@@ -38,7 +39,7 @@ RESEND_API_KEY=
 ADMIN_EMAIL=
 ```
 
-Never expose `SUPABASE_SERVICE_ROLE_KEY`, `DIRECTUS_STATIC_TOKEN`, or `RESEND_API_KEY` to browser code. The current app does not import them from client components.
+Never expose `SUPABASE_SERVICE_ROLE_KEY`, `WORDPRESS_APPLICATION_PASSWORD`, or `RESEND_API_KEY` to browser code.
 
 ## Local setup
 
@@ -47,20 +48,20 @@ Never expose `SUPABASE_SERVICE_ROLE_KEY`, `DIRECTUS_STATIC_TOKEN`, or `RESEND_AP
 3. Run `supabase/schema.sql` in a new Supabase project.
 4. Apply the SQL files in `supabase/migrations` in filename order.
 5. For an isolated development database only, optionally apply `supabase/seed.sql` and set `ENABLE_DEMO_CONTENT=true`.
-6. Optionally connect Directus to the same PostgreSQL database and configure the collections in `directus/README.md`.
+6. Optionally install WordPress with ACF and register the custom post types listed below.
 7. Run `pnpm dev`.
 
-With the server-only Supabase key configured, production properties, developers, cities, services, providers, materials, current works, testimonials, CMS pages, and leads come from Supabase. Empty production tables render honest empty states instead of fictional records. Local fixtures require the explicit `ENABLE_DEMO_CONTENT=true` opt-in and remain disabled in production.
+With the server-only Supabase key configured, production content comes from Supabase. Empty production tables render honest empty states instead of fictional records. Local fixtures require the explicit `ENABLE_DEMO_CONTENT=true` opt-in and remain disabled in production.
 
 ## CMS
 
-The protected admin writes properties, pages, and leads directly to Supabase. Lead submissions go through `app/api/leads/route.ts`. When both Directus variables are configured, Directus becomes the preferred CMS adapter without changing public routes.
+When `WORDPRESS_URL` is set, headless WordPress becomes the preferred CMS. Register REST-visible custom post types for `properties`, `developers`, `cities`, `services`, `service-providers`, `materials`, `testimonials`, `leads`, and `cms-sections`; regular WordPress pages back CMS pages. Expose their fields through ACF REST. Add `WORDPRESS_USERNAME` and a WordPress Application Password for authenticated admin writes. Without WordPress, the protected admin uses Supabase.
 
 ## Main routes
 
 - Properties: `/buy`, `/rent`, `/sell-property`, `/property/[slug]`, `/properties/[category]`, `/properties/[city]/[type]`
 - Services: `/construction`, `/architecture`, `/interiors`, `/painting`, `/renovation`, `/maintenance`
-- Supply and delivery: `/materials`, `/current-works`, `/service-providers`
+- Supply and delivery: `/materials`, `/service-providers`
 - Tools: `/calculators`, `/compare`
 - Protected workspaces: `/dashboard`, `/admin`
 

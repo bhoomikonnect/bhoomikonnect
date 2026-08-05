@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, MessageCircle, PhoneCall, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { navItems, serviceNavItems } from "@/lib/site";
 import { Button } from "@/components/ui/button";
@@ -75,13 +75,22 @@ export function MobileNav() {
             >
               Register
             </Link>
-            <Link
-              href="/post-property"
+            <a
+              href="tel:+919063242304"
               onClick={() => setOpen(false)}
-              className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white"
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-bold text-primary"
             >
-              Post Property
-            </Link>
+              <PhoneCall className="size-4" aria-hidden /> Call +91 90632 42304
+            </a>
+            <a
+              href="https://wa.me/919063242304?text=Hello%20BhoomiKonnect%2C%20I%20would%20like%20to%20know%20more."
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setOpen(false)}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-[#25D366] px-3 py-2 text-sm font-bold text-white"
+            >
+              <MessageCircle className="size-4" aria-hidden /> WhatsApp
+            </a>
             <Link href="/contact?type=free-quote" onClick={() => setOpen(false)} className="col-span-2 rounded-md bg-primary px-3 py-2 text-center text-sm font-semibold text-white">
               Get Free Quote
             </Link>

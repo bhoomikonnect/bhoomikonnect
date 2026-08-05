@@ -2,12 +2,12 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { createEmptyPage, createEmptyProperty } from "@/lib/cms-defaults";
 import {
-  directusCreateItem,
-  directusDeleteItem,
-  directusReadItems,
-  directusUpdateItem,
-  isDirectusConfigured
-} from "@/lib/directus";
+  cmsCreateItem as directusCreateItem,
+  cmsDeleteItem as directusDeleteItem,
+  cmsReadItems as directusReadItems,
+  cmsUpdateItem as directusUpdateItem,
+  isExternalCmsConfigured as isDirectusConfigured
+} from "@/lib/wordpress";
 import { readLocalCmsStore, updateLocalCmsStore } from "@/lib/local-cms";
 import { getProperties } from "@/lib/marketplace";
 import { createSupabaseAdminClient, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
@@ -54,7 +54,7 @@ function nearbyArray(value: unknown): CmsPropertyInput["nearby"] {
     .map((item) => ({ label: stringValue(item.label), distance: stringValue(item.distance), type: stringValue(item.type, "Business Hub") }));
 }
 
-export function normalizeCmsProperty(record: UnknownRecord, source: CmsPropertyRecord["source"] = "directus"): CmsPropertyRecord {
+export function normalizeCmsProperty(record: UnknownRecord, source: CmsPropertyRecord["source"] = "wordpress"): CmsPropertyRecord {
   const defaults = createEmptyProperty();
   const now = new Date().toISOString();
 
@@ -157,7 +157,7 @@ function supabasePropertyPayload(property: CmsPropertyInput) {
 export async function listCmsProperties() {
   if (isDirectusConfigured()) {
     const records = await directusReadItems<UnknownRecord>("properties", { fields: "*,developer_id.id,developer_id.name,developer_id.slug", sort: "-updated_at" });
-    return records.map((record) => normalizeCmsProperty(record, "directus"));
+    return records.map((record) => normalizeCmsProperty(record, "wordpress"));
   }
 
   if (isSupabaseAdminConfigured()) {
@@ -181,7 +181,7 @@ export async function createCmsProperty(input: CmsPropertyInput) {
   const now = new Date().toISOString();
   if (isDirectusConfigured()) {
     const record = await directusCreateItem<Record<string, unknown>, UnknownRecord>("properties", directusPropertyPayload(input));
-    return normalizeCmsProperty(record, "directus");
+    return normalizeCmsProperty(record, "wordpress");
   }
 
   if (isSupabaseAdminConfigured()) {
@@ -205,7 +205,7 @@ export async function updateCmsProperty(identifier: string, input: CmsPropertyIn
   if (!existing) throw new Error("Property not found.");
   if (isDirectusConfigured()) {
     const record = await directusUpdateItem<Record<string, unknown>, UnknownRecord>("properties", existing.id, directusPropertyPayload(input));
-    return normalizeCmsProperty(record, "directus");
+    return normalizeCmsProperty(record, "wordpress");
   }
 
   if (isSupabaseAdminConfigured()) {
@@ -261,7 +261,7 @@ function normalizeSection(record: UnknownRecord, index = 0): CmsPageSection {
   };
 }
 
-function normalizePage(record: UnknownRecord, sections: UnknownRecord[] = [], source: CmsPageRecord["source"] = "directus"): CmsPageRecord {
+function normalizePage(record: UnknownRecord, sections: UnknownRecord[] = [], source: CmsPageRecord["source"] = "wordpress"): CmsPageRecord {
   const defaults = createEmptyPage();
   const status = stringValue(record.status, "draft");
   const now = new Date().toISOString();
@@ -279,7 +279,7 @@ export async function listCmsPages() {
       directusReadItems<UnknownRecord>("cms_pages", { fields: "*", sort: "-updated_at" }),
       directusReadItems<UnknownRecord>("cms_sections", { fields: "*", sort: "display_order" })
     ]);
-    return pages.map((page) => normalizePage(page, sections.filter((section) => stringValue(typeof section.page_id === "object" && section.page_id ? (section.page_id as UnknownRecord).id : section.page_id) === stringValue(page.id)), "directus"));
+    return pages.map((page) => normalizePage(page, sections.filter((section) => stringValue(typeof section.page_id === "object" && section.page_id ? (section.page_id as UnknownRecord).id : section.page_id) === stringValue(page.id)), "wordpress"));
   }
 
   if (isSupabaseAdminConfigured()) {
@@ -328,7 +328,7 @@ export async function createCmsPage(input: CmsPageInput) {
     const sections = await Promise.all(input.sections.map((section, index) => directusCreateItem<Record<string, unknown>, UnknownRecord>("cms_sections", {
       page_id: pageId, block_type: section.block_type, content: section, display_order: index, is_active: true
     })));
-    return normalizePage(page, sections, "directus");
+    return normalizePage(page, sections, "wordpress");
   }
 
   if (isSupabaseAdminConfigured()) {
@@ -378,7 +378,7 @@ export async function updateCmsPage(identifier: string, input: CmsPageInput) {
     const sections = await Promise.all(input.sections.map((section, index) => directusCreateItem<Record<string, unknown>, UnknownRecord>("cms_sections", {
       page_id: existing.id, block_type: section.block_type, content: section, display_order: index, is_active: true
     })));
-    return normalizePage(page, sections, "directus");
+    return normalizePage(page, sections, "wordpress");
   }
 
   if (isSupabaseAdminConfigured()) {
