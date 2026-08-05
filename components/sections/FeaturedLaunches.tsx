@@ -35,7 +35,9 @@ export function FeaturedLaunches({ compact = false }: { compact?: boolean }) {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden items-center gap-3 text-sm text-emerald-100/70 lg:flex"><span className="h-px w-10 bg-amber-300/60" /> Featured projects</span>
+            <Link href="/projects" className="hidden items-center gap-2 rounded-full border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition hover:border-amber-300 hover:bg-white/10 sm:inline-flex">
+              View all projects <ArrowUpRight className="size-4" aria-hidden />
+            </Link>
             <button type="button" onClick={() => move(-1)} aria-label="Previous projects" className="grid size-11 place-items-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/15"><ArrowLeft className="size-5" /></button>
             <button type="button" onClick={() => move(1)} aria-label="Next projects" className="grid size-11 place-items-center rounded-full bg-amber-300 text-slate-950 transition hover:bg-amber-200"><ArrowRight className="size-5" /></button>
           </div>
@@ -81,6 +83,9 @@ export function FeaturedLaunches({ compact = false }: { compact?: boolean }) {
             );
           })}
         </div>
+        <Link href="/projects" className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-sm font-bold text-white transition hover:border-amber-300 hover:bg-white/10 sm:hidden">
+          View all projects <ArrowUpRight className="size-4" aria-hidden />
+        </Link>
       </div>
     </section>
   );
