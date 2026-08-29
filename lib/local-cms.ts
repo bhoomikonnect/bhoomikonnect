@@ -24,7 +24,7 @@ export async function readLocalCmsStore(): Promise<LocalCmsStore> {
 
 export async function updateLocalCmsStore<T>(mutator: (store: LocalCmsStore) => T | Promise<T>): Promise<T> {
   if (process.env.NODE_ENV === "production") {
-    throw new Error("Local CMS writes are disabled in production. Configure WordPress or Supabase for production content management.");
+    throw new Error("Local CMS writes are disabled in production. Configure Directus or Supabase for production content management.");
   }
 
   let result!: T;

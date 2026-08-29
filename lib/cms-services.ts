@@ -1,10 +1,10 @@
 import "server-only";
 import {
-  cmsCreateItem as directusCreateItem,
-  cmsReadItems as directusReadItems,
-  cmsUpdateItem as directusUpdateItem,
-  isExternalCmsConfigured as isDirectusConfigured
-} from "@/lib/wordpress";
+  directusCreateItem,
+  directusReadItems,
+  directusUpdateItem,
+  isDirectusConfigured
+} from "@/lib/directus";
 import { createSupabaseAdminClient, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 import type { CmsServiceInput, CmsServiceRecord } from "@/types/cms-service";
 import type { Faq, ServiceFamily } from "@/types/marketplace";
@@ -93,7 +93,7 @@ export function createEmptyCmsService(): CmsServiceInput {
 export async function listCmsServices(): Promise<CmsServiceRecord[]> {
   if (isDirectusConfigured()) {
     const rows = await directusReadItems<UnknownRecord>("services", { sort: "display_order,title" });
-    return rows.map((row) => normalize(row, "wordpress"));
+    return rows.map((row) => normalize(row, "directus"));
   }
   if (!isSupabaseAdminConfigured()) return [];
   const supabase = createSupabaseAdminClient()!;
@@ -108,7 +108,7 @@ export async function getCmsService(identifier: string) {
 
 export async function createCmsService(input: CmsServiceInput) {
   if (isDirectusConfigured()) {
-    return normalize(await directusCreateItem<CmsServiceInput, UnknownRecord>("services", input), "wordpress");
+    return normalize(await directusCreateItem<CmsServiceInput, UnknownRecord>("services", input), "directus");
   }
   const supabase = createSupabaseAdminClient();
   if (!supabase) throw new Error("Supabase CMS is not configured.");
@@ -121,7 +121,7 @@ export async function updateCmsService(identifier: string, input: CmsServiceInpu
   const existing = await getCmsService(identifier);
   if (!existing) throw new Error("Service not found.");
   if (isDirectusConfigured()) {
-    return normalize(await directusUpdateItem<CmsServiceInput, UnknownRecord>("services", existing.id, input), "wordpress");
+    return normalize(await directusUpdateItem<CmsServiceInput, UnknownRecord>("services", existing.id, input), "directus");
   }
   const supabase = createSupabaseAdminClient();
   if (!supabase) throw new Error("Supabase CMS is not configured.");

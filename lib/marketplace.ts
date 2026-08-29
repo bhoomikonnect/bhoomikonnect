@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { randomUUID } from "node:crypto";
-import { cmsAssetUrl as directusAssetUrl, cmsCreateItem as directusCreateItem, cmsReadItems as directusReadItems, cmsUpdateItem as directusUpdateItem, isExternalCmsConfigured as isDirectusConfigured } from "@/lib/wordpress";
+import { directusAssetUrl, directusCreateItem, directusReadItems, directusUpdateItem, isDirectusConfigured } from "@/lib/directus";
 import {
   cities as fallbackCities,
   developers as fallbackDevelopers,

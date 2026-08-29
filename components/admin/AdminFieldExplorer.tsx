@@ -53,7 +53,7 @@ export function AdminFieldExplorer() {
           </Badge>
           <h2 className="mt-3 text-2xl font-bold">CMS field explorer</h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-            Search the fields available to editors across the WordPress content types and Supabase data model.
+            Search the fields available to editors across the Directus collections and Supabase data model.
           </p>
         </div>
         <div className="flex gap-2 text-sm">

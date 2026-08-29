@@ -26,5 +26,5 @@ export type CmsServiceRecord = CmsServiceInput & {
   id: string;
   created_at: string;
   updated_at: string;
-  source: "wordpress" | "supabase";
+  source: "directus" | "supabase";
 };

@@ -7,7 +7,7 @@ import {
   testimonials as localTestimonials
 } from "@/lib/catalog";
 import { isDemoContentEnabled } from "@/lib/demo";
-import { cmsAssetUrl as directusAssetUrl, cmsReadItems as directusReadItems, isExternalCmsConfigured as isDirectusConfigured } from "@/lib/wordpress";
+import { directusAssetUrl, directusReadItems, isDirectusConfigured } from "@/lib/directus";
 import { createSupabaseAdminClient, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 import type {
   CurrentWork,

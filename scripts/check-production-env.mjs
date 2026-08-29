@@ -15,13 +15,16 @@ const required = [
   "NEXT_PUBLIC_SITE_URL",
   "NEXT_PUBLIC_PRIMARY_PHONE",
   "NEXT_PUBLIC_WHATSAPP_NUMBER",
-  "NEXT_PUBLIC_SUPABASE_URL",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-  "SUPABASE_SERVICE_ROLE_KEY",
   "ADMIN_EMAIL",
   "RESEND_API_KEY",
   "RESEND_FROM_EMAIL",
   "LEAD_NOTIFICATION_EMAILS"
+];
+
+const requiredAlternatives = [
+  ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL"],
+  ["NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "SUPABASE_PUBLISHABLE_KEY"],
+  ["SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SECRET_KEY"]
 ];
 
 const placeholderPattern = /example\.com|your-|your_|replace|changeme|00000 00000|9000000000/i;
@@ -32,12 +35,17 @@ for (const name of required) {
   else if (placeholderPattern.test(value)) errors.push(`${name} still contains a placeholder value`);
 }
 
-const wordpressConfigured = Boolean(process.env.WORDPRESS_URL || process.env.WORDPRESS_USERNAME || process.env.WORDPRESS_APPLICATION_PASSWORD);
-if (wordpressConfigured && !process.env.WORDPRESS_URL) {
-  errors.push("WORDPRESS_URL is required when headless WordPress is enabled");
+for (const alternatives of requiredAlternatives) {
+  const configured = alternatives.some((name) => Boolean(process.env[name]?.trim()));
+  if (!configured) errors.push(`Set one of: ${alternatives.join(", ")}`);
 }
-if (Boolean(process.env.WORDPRESS_USERNAME) !== Boolean(process.env.WORDPRESS_APPLICATION_PASSWORD)) {
-  errors.push("WORDPRESS_USERNAME and WORDPRESS_APPLICATION_PASSWORD must be configured together for CMS writes");
+
+const directusConfigured = Boolean(process.env.DIRECTUS_URL || process.env.DIRECTUS_STATIC_TOKEN);
+if (directusConfigured && !process.env.DIRECTUS_URL) {
+  errors.push("DIRECTUS_URL is required when Directus is enabled");
+}
+if (directusConfigured && !process.env.DIRECTUS_STATIC_TOKEN) {
+  errors.push("DIRECTUS_STATIC_TOKEN is required when Directus is enabled");
 }
 
 const twilioNames = [
@@ -57,7 +65,7 @@ if (twilioConfigured) {
   }
 }
 
-for (const name of ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_SUPABASE_URL", ...(process.env.WORDPRESS_URL ? ["WORDPRESS_URL"] : [])]) {
+for (const name of ["NEXT_PUBLIC_SITE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL ? "NEXT_PUBLIC_SUPABASE_URL" : "SUPABASE_URL", ...(process.env.DIRECTUS_URL ? ["DIRECTUS_URL"] : [])]) {
   const value = process.env[name];
   if (value) {
     try {
@@ -80,8 +88,8 @@ if (smsRecipients.some((phone) => !/^\+[1-9]\d{7,14}$/.test(phone))) {
   errors.push("LEAD_SMS_TO numbers must use E.164 format, for example +919876543210");
 }
 
-if (!wordpressConfigured) {
-  console.log("WordPress is not configured; using the included Supabase CMS repository.");
+if (!directusConfigured) {
+  console.log("Directus is not configured; using the included Supabase CMS repository.");
 }
 if (!twilioConfigured) {
   console.log("Twilio is not configured; SMS delivery is disabled and email/WhatsApp remain active.");

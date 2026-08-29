@@ -79,7 +79,7 @@ export function PropertyInventory({ properties }: { properties: CmsPropertyRecor
         </table>
         {!visible.length ? <div className="grid min-h-40 place-items-center p-8 text-center text-sm text-muted-foreground">No properties match this view.</div> : null}
       </div>
-      <p className="text-xs text-muted-foreground">Production records are stored in Supabase unless the optional headless WordPress adapter is enabled. Archived records are removed from public listings.</p>
+      <p className="text-xs text-muted-foreground">Production records are stored in Supabase unless the optional Directus adapter is enabled. Archived records are removed from public listings.</p>
     </div>
   );
 }
