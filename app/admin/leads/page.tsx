@@ -8,6 +8,7 @@ import { notificationConfiguration } from "@/lib/notifications";
 import { createMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export const metadata: Metadata = createMetadata({ title: "Lead Inbox", description: "Review BhoomiKonnect enquiries and notification delivery.", path: "/admin/leads", noIndex: true });
 
 export default async function AdminLeadsPage() {

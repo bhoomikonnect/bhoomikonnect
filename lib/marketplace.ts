@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { randomUUID } from "node:crypto";
+import { unstable_noStore as noStore } from "next/cache";
 import { directusAssetUrl, directusCreateItem, directusReadItems, directusUpdateItem, isDirectusConfigured } from "@/lib/directus";
 import {
   cities as fallbackCities,
@@ -486,16 +487,16 @@ function leadDatabasePayload(payload: LeadPayload) {
 
 export async function createLead(payload: LeadPayload): Promise<LeadRecord> {
   const now = new Date().toISOString();
-  if (isDirectusConfigured()) {
-    const record = await directusCreateItem<Record<string, unknown>, DirectusRecord>("leads", leadDatabasePayload(payload));
-    return { ...mapLeadRecord(record), ...payload, delivery: skippedDelivery };
-  }
-
   if (isSupabaseAdminConfigured()) {
     const supabase = createSupabaseAdminClient()!;
     const { data, error } = await supabase.from("leads").insert(leadDatabasePayload(payload)).select("*").single();
     if (error) throw error;
     return { ...mapLeadRecord(data as DirectusRecord), ...payload, delivery: skippedDelivery };
+  }
+
+  if (isDirectusConfigured()) {
+    const record = await directusCreateItem<Record<string, unknown>, DirectusRecord>("leads", leadDatabasePayload(payload));
+    return { ...mapLeadRecord(record), ...payload, delivery: skippedDelivery };
   }
 
   const lead: LeadRecord = {
@@ -513,15 +514,6 @@ export async function createLead(payload: LeadPayload): Promise<LeadRecord> {
 }
 
 export async function updateLeadDelivery(leadId: string, delivery: LeadDeliveryStatus) {
-  if (isDirectusConfigured()) {
-    await directusUpdateItem("leads", leadId, {
-      metadata: {
-        notification_delivery: delivery
-      }
-    });
-    return;
-  }
-
   if (isSupabaseAdminConfigured()) {
     const supabase = createSupabaseAdminClient()!;
     const { data: existing, error: readError } = await supabase.from("leads").select("metadata").eq("id", leadId).single();
@@ -537,22 +529,32 @@ export async function updateLeadDelivery(leadId: string, delivery: LeadDeliveryS
     return;
   }
 
+  if (isDirectusConfigured()) {
+    await directusUpdateItem("leads", leadId, {
+      metadata: {
+        notification_delivery: delivery
+      }
+    });
+    return;
+  }
+
   await updateLocalCmsStore((store) => {
     store.leads = store.leads.map((lead) => lead.id === leadId ? { ...lead, delivery, updatedAt: new Date().toISOString() } : lead);
   });
 }
 
 export async function listLeads(): Promise<LeadRecord[]> {
-  if (isDirectusConfigured()) {
-    const records = await directusReadItems<DirectusRecord>("leads", { fields: "*", sort: "-created_at" });
-    return records.map(mapLeadRecord);
-  }
-
+  noStore();
   if (isSupabaseAdminConfigured()) {
     const supabase = createSupabaseAdminClient()!;
     const { data, error } = await supabase.from("leads").select("*").order("created_at", { ascending: false });
     if (error) throw error;
     return (data || []).map((record) => mapLeadRecord(record as DirectusRecord));
+  }
+
+  if (isDirectusConfigured()) {
+    const records = await directusReadItems<DirectusRecord>("leads", { fields: "*", sort: "-created_at" });
+    return records.map(mapLeadRecord);
   }
 
   return (await readLocalCmsStore()).leads.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
