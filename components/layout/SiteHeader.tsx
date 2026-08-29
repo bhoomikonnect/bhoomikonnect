@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MessageCircle, PhoneCall, UserRound } from "lucide-react";
+import { LayoutDashboard, MessageCircle, PhoneCall, UserRound } from "lucide-react";
 import { DesktopServicesMenu } from "@/components/layout/DesktopServicesMenu";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
@@ -20,9 +20,9 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background shadow-sm supports-[backdrop-filter]:bg-background/95 supports-[backdrop-filter]:backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 w-full max-w-[1600px] items-center justify-between gap-3 px-4 py-2 xl:px-6">
-        <Link href="/" className="flex shrink-0 items-center" aria-label={`${siteConfig.name} home`}>
-          <Image src="/brand/logo-horizontal.svg" alt="BhoomiKonnect" width={220} height={48} priority className="h-10 w-auto dark:hidden" />
-          <Image src="/brand/logo-horizontal-dark.svg" alt="BhoomiKonnect" width={220} height={48} priority className="hidden h-10 w-auto dark:block" />
+        <Link href="/" className="flex min-w-0 shrink items-center sm:shrink-0" aria-label={`${siteConfig.name} home`}>
+          <Image src="/brand/logo-horizontal.svg" alt="BhoomiKonnect" width={233} height={48} priority className="h-auto w-full max-w-[175px] object-contain sm:max-w-[194px] dark:hidden" />
+          <Image src="/brand/logo-horizontal-dark.svg" alt="BhoomiKonnect" width={233} height={48} priority className="hidden h-auto w-full max-w-[175px] object-contain sm:max-w-[194px] dark:block" />
         </Link>
 
         <nav className="hidden min-w-0 items-center gap-0.5 lg:flex" aria-label="Primary navigation">
@@ -43,6 +43,9 @@ export function SiteHeader() {
             <ThemeToggle />
             <Link href="/login" className={cn(buttonVariants({ variant: "ghost", size: "icon" }))} aria-label="Login" title="Login">
               <UserRound className="size-4" aria-hidden />
+            </Link>
+            <Link href="/admin" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2")}>
+              <LayoutDashboard className="size-4" aria-hidden /> Admin
             </Link>
             <a
               href="tel:+919063242304"

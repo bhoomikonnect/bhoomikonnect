@@ -4,6 +4,27 @@
   "pages": [],
   "leads": [
     {
+      "name": "Local verification",
+      "phone": "9063242304",
+      "email": "local-test@bhoomikonnect.test",
+      "message": "Local lead storage verification",
+      "source": "Codex local verification",
+      "leadType": "General Contact",
+      "sourcePage": "/local-verification",
+      "consent": true,
+      "id": "92a00654-b40a-40e3-9bb6-0d2b8e3b6447",
+      "status": "new",
+      "createdAt": "2026-08-06T15:36:34.231Z",
+      "updatedAt": "2026-08-06T15:36:34.250Z",
+      "delivery": {
+        "adminEmail": "skipped",
+        "customerEmail": "skipped",
+        "adminSms": "skipped",
+        "customerSms": "skipped",
+        "errors": []
+      }
+    },
+    {
       "name": "test",
       "phone": "9543256786",
       "whatsapp": "9654356785",

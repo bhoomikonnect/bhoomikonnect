@@ -10,7 +10,11 @@ const footerGroups = [
   },
   {
     title: "Company",
-    links: [...navItems.filter((item) => ["/developers", "/about", "/contact"].includes(item.href)), { label: "FAQs", href: "/faqs" }]
+    links: [
+      ...navItems.filter((item) => ["/developers", "/about", "/contact"].includes(item.href)),
+      { label: "FAQs", href: "/faqs" },
+      { label: "Admin login", href: "/admin" }
+    ]
   },
   {
     title: "Services",

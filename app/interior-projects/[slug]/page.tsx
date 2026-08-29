@@ -5,17 +5,17 @@ import { ArrowLeft } from "lucide-react";
 import { QuoteForm } from "@/components/forms/QuoteForm";
 import { MediaGallery } from "@/components/ui/MediaGallery";
 import { Badge } from "@/components/ui/badge";
-import { interiorPortfolio } from "@/lib/interior-portfolio";
+import { getInteriorPortfolioProject, interiorPortfolio } from "@/lib/interior-portfolio";
 import { createMetadata } from "@/lib/seo";
 
 export function generateStaticParams() { return interiorPortfolio.map((project) => ({ slug: project.slug })); }
 export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const project = interiorPortfolio.find((item) => item.slug === params.slug);
+  const project = getInteriorPortfolioProject(params.slug);
   return project ? createMetadata({ title: `${project.title} | Interior Portfolio`, description: project.description, path: `/interior-projects/${project.slug}`, image: project.images[0] }) : {};
 }
 
 export default function InteriorProjectPage({ params }: { params: { slug: string } }) {
-  const project = interiorPortfolio.find((item) => item.slug === params.slug);
+  const project = getInteriorPortfolioProject(params.slug);
   if (!project) notFound();
   return <>
     <section className="border-b bg-slate-950 py-10 text-white sm:py-14"><div className="container"><Link href="/interiors" className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300"><ArrowLeft className="size-4" /> Back to interiors</Link><Badge variant="accent" className="mt-6 block w-fit">{project.category}</Badge><h1 className="mt-4 max-w-4xl text-balance text-4xl font-bold sm:text-5xl">{project.title}</h1><p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">{project.description}</p></div></section>

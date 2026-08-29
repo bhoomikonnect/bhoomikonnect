@@ -75,6 +75,13 @@ export function MobileNav() {
             >
               Register
             </Link>
+            <Link
+              href="/admin"
+              onClick={() => setOpen(false)}
+              className="rounded-md px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/10"
+            >
+              Admin dashboard
+            </Link>
             <a
               href="tel:+919063242304"
               onClick={() => setOpen(false)}

@@ -7,7 +7,7 @@ import {
   properties as fallbackProperties
 } from "@/lib/data";
 import { isDemoContentEnabled } from "@/lib/demo";
-import { eeshanyaDeveloper, getFeaturedLaunchBySlug } from "@/lib/featured-launches";
+import { eeshanyaDeveloper, featuredLaunches, getFeaturedLaunchBySlug } from "@/lib/featured-launches";
 import { getNewProjectDeveloper } from "@/lib/new-projects";
 import { readLocalCmsStore, updateLocalCmsStore } from "@/lib/local-cms";
 import { createSupabaseAdminClient, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
@@ -293,6 +293,18 @@ export const getDevelopers = cache(async () => {
 });
 
 export const getProperties = cache(async () => {
+  const mergeFeaturedProjects = (properties: Property[]) => {
+    const merged = new Map(
+      featuredLaunches
+        .filter((property) => property.active && property.verifiedProperty)
+        .map((property) => [property.slug, property])
+    );
+    properties.forEach((property) => merged.set(property.slug, property));
+    return [...merged.values()].sort(
+      (left, right) => Number(right.featuredProperty) - Number(left.featuredProperty) || left.title.localeCompare(right.title)
+    );
+  };
+
   if (isDirectusConfigured()) {
     return safeDirectus(
       async () => {
@@ -304,7 +316,7 @@ export const getProperties = cache(async () => {
           sort: "-featured,title"
         });
 
-        return records.map(mapProperty).filter((property) => property.active);
+        return mergeFeaturedProjects(records.map(mapProperty).filter((property) => property.active));
       },
       []
     );
@@ -323,7 +335,7 @@ export const getProperties = cache(async () => {
         .order("featured", { ascending: false })
         .order("title", { ascending: true });
       if (error) throw error;
-      return (data || []).map((record) => mapProperty(record as unknown as DirectusRecord)).filter((property) => property.active);
+      return mergeFeaturedProjects((data || []).map((record) => mapProperty(record as unknown as DirectusRecord)).filter((property) => property.active));
     }, []);
   }
 
@@ -339,7 +351,7 @@ export const getProperties = cache(async () => {
   );
 
   localProperties.forEach((property) => merged.set(property.slug, property));
-  return [...merged.values()].sort((left, right) => Number(right.featuredProperty) - Number(left.featuredProperty) || left.title.localeCompare(right.title));
+  return mergeFeaturedProjects([...merged.values()]);
 });
 
 export const getCities = cache(async () => {

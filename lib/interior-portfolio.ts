@@ -12,4 +12,8 @@ export const interiorPortfolio: InteriorPortfolioProject[] = [
   { slug: "decorative-privacy-solutions", title: "Decorative Privacy, Naturally Lit", category: "Windows, films & aluminium work", description: "Sliding systems and decorative privacy films soften direct views while preserving daylight, adding colour and pattern to kitchens, bedrooms, balconies, and utility openings.", images: paths("aluminium-sliding-door.jpeg", "dotted-privacy-window.jpeg", "dotted-kitchen-window.jpeg", "leaf-privacy-window.jpeg", "blossom-privacy-window.jpeg", "floral-privacy-window.jpeg") }
 ];
 
+export function getInteriorPortfolioProject(slug: string) {
+  return interiorPortfolio.find((project) => project.slug === slug);
+}
+
 export const interiorShowcaseVideo = `${root}/interior-work-showcase.mp4`;
