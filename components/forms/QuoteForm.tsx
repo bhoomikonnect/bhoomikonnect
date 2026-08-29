@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarDays, CheckCircle2, Loader2, MessageCircle, Send } from "lucide-react";
+import { CheckCircle2, Loader2, MessageCircle, Send } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -40,19 +40,25 @@ export function QuoteForm({
 }: QuoteFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState("");
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<QuoteValues>({
+  const [whatsappSameAsPhone, setWhatsappSameAsPhone] = useState(true);
+  const { register, handleSubmit, setError, clearErrors, setValue, formState: { errors, isSubmitting } } = useForm<QuoteValues>({
     resolver: zodResolver(minimal ? minimalQuoteFormSchema : quoteFormSchema),
     defaultValues: { consent: true, city: minimal ? "Not provided" : "" }
   });
 
   async function submit(values: QuoteValues) {
     setServerError("");
+    if (!whatsappSameAsPhone && !values.whatsapp?.trim()) {
+      setError("whatsapp", { type: "required", message: "Please enter your WhatsApp number" });
+      return;
+    }
     try {
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
+          whatsapp: whatsappSameAsPhone ? values.phone : values.whatsapp,
           leadType,
           source,
           serviceSlug,
@@ -101,13 +107,25 @@ export function QuoteForm({
       <div className={`${minimal ? "mt-4 gap-3" : "mt-5 gap-4"} grid ${compact || minimal ? "" : "sm:grid-cols-2"}`}>
         <label className={fieldClass}>Name<Input {...register("name")} autoComplete="name" />{errors.name ? <span className={errorClass}>{errors.name.message}</span> : null}</label>
         <label className={fieldClass}>Phone<Input {...register("phone")} inputMode="tel" autoComplete="tel" />{errors.phone ? <span className={errorClass}>{errors.phone.message}</span> : null}</label>
+        <label className={`${compact || minimal ? "" : "sm:col-span-2"} flex items-center gap-2 text-sm font-medium text-muted-foreground`}>
+          <input
+            type="checkbox"
+            checked={whatsappSameAsPhone}
+            onChange={(event) => {
+              setWhatsappSameAsPhone(event.target.checked);
+              clearErrors("whatsapp");
+              if (event.target.checked) setValue("whatsapp", "");
+            }}
+            className="size-4 accent-primary"
+          />
+          My WhatsApp number is the same as my phone number
+        </label>
+        {!whatsappSameAsPhone ? <label className={fieldClass}>WhatsApp number<Input {...register("whatsapp")} inputMode="tel" autoComplete="tel" />{errors.whatsapp ? <span className={errorClass}>{errors.whatsapp.message}</span> : null}</label> : null}
         {minimal ? <label className={fieldClass}>Email<Input {...register("email")} type="email" autoComplete="email" />{errors.email ? <span className={errorClass}>{errors.email.message}</span> : null}</label> : null}
         {minimal ? <input type="hidden" {...register("city")} /> : <>
-          <label className={fieldClass}>WhatsApp<Input {...register("whatsapp")} inputMode="tel" /></label>
           <label className={fieldClass}>Email<Input {...register("email")} type="email" autoComplete="email" /></label>
           <label className={fieldClass}>Location<Input {...register("city")} placeholder="City or site location" />{errors.city ? <span className={errorClass}>{errors.city.message}</span> : null}</label>
           <label className={fieldClass}>Budget<Input {...register("budget")} placeholder="Approximate budget" /></label>
-          <label className={fieldClass}>Preferred date<div className="relative"><CalendarDays className="pointer-events-none absolute left-3 top-3.5 size-4 text-muted-foreground" aria-hidden /><Input {...register("preferredDate")} type="date" className="pl-10" /></div></label>
         </>}
         <label className={`${fieldClass} ${compact || minimal ? "" : "sm:col-span-2"}`}>Requirement<Textarea {...register("message")} rows={minimal ? 3 : undefined} placeholder="Tell us briefly what you need" />{errors.message ? <span className={errorClass}>{errors.message.message}</span> : null}</label>
       </div>

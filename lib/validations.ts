@@ -33,7 +33,6 @@ export const quoteFormSchema = leadSchema.pick({
   email: true,
   city: true,
   budget: true,
-  preferredDate: true,
   message: true,
   consent: true
 }).extend({
