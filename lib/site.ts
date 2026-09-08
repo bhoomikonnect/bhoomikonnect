@@ -24,7 +24,6 @@ export const navItems = [
   { label: "Sell Property", href: "/sell-property" },
   { label: "Rent", href: "/rent" },
   { label: "Projects", href: "/projects" },
-  { label: "Developers", href: "/developers" },
   { label: "About Us", href: "/about" },
   { label: "Contact", href: "/contact" }
 ];
@@ -50,7 +49,6 @@ export const staticRoutes: MetadataRoute.Sitemap = [
   { url: `${siteConfig.url}/villas`, priority: 0.85, changeFrequency: "daily" },
   { url: `${siteConfig.url}/commercial`, priority: 0.8, changeFrequency: "daily" },
   { url: `${siteConfig.url}/projects`, priority: 0.85, changeFrequency: "weekly" },
-  { url: `${siteConfig.url}/developers`, priority: 0.8, changeFrequency: "weekly" },
   { url: `${siteConfig.url}/cities`, priority: 0.75, changeFrequency: "weekly" },
   ...serviceNavItems.map((item) => ({ url: `${siteConfig.url}${item.href}`, priority: 0.8, changeFrequency: "weekly" as const })),
   { url: `${siteConfig.url}/calculators`, priority: 0.7, changeFrequency: "monthly" },

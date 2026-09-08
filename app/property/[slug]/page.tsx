@@ -13,9 +13,7 @@ import {
   ParkingCircle,
   Share2,
   ShieldCheck,
-  Star,
-  Video
-  ,Phone
+  Phone
 } from "lucide-react";
 import { JsonLd } from "@/components/JsonLd";
 import { PropertyActionButtons } from "@/components/properties/PropertyActionButtons";
@@ -29,7 +27,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MediaGallery } from "@/components/ui/MediaGallery";
 import { publicContactLinks, whatsappContactLink } from "@/lib/env";
-import { getDeveloperBySlug, getProperties, getPropertyBySlug, getRelatedProperties } from "@/lib/marketplace";
+import { getProperties, getPropertyBySlug, getRelatedProperties } from "@/lib/marketplace";
+import { publicPropertyTitle } from "@/lib/public-listing";
 import { breadcrumbSchema, createMetadata, faqSchema, propertySchema } from "@/lib/seo";
 import { cn, formatPrice } from "@/lib/utils";
 import { featuredLaunches } from "@/lib/featured-launches";
@@ -62,11 +61,10 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
   }
 
   return createMetadata({
-    title: property.seoTitle,
-    description: property.metaDescription,
+    title: `${publicPropertyTitle(property)} | BhoomiKonnect`,
+    description: "Review a BhoomiKonnect-verified property listing and contact our team for current availability, pricing, documents, and a site visit.",
     path: `/property/${property.slug}`,
-    image: property.gallery[0],
-    keywords: property.keywords
+    keywords: ["verified property", "BhoomiKonnect"]
   });
 }
 
@@ -77,19 +75,19 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
     notFound();
   }
 
-  const developer = await getDeveloperBySlug(property.developerSlug);
   const related = await getRelatedProperties(property);
+  const publicTitle = publicPropertyTitle(property);
   const hasProposedApproval = property.approvals.some((approval) => approval.toLowerCase().includes("proposed"));
   const faqs = [
     {
-      question: `What is the approval status of ${property.projectName}?`,
+      question: "What is the approval status of this property?",
       answer: hasProposedApproval
-        ? `${property.projectName} is presented as a proposed approval project. Current details: ${property.approvals.join(", ")}. Buyers should verify final approval and registration documents before booking.`
-        : `${property.projectName} lists RERA number ${property.reraNumber} and approval details: ${property.approvals.join(", ")}. Buyers should independently verify the current documents before booking.`
+        ? `This listing is presented as a proposed approval project. Current details: ${property.approvals.join(", ")}. Buyers should verify final approval and registration documents before booking.`
+        : `This listing includes RERA number ${property.reraNumber} and approval details: ${property.approvals.join(", ")}. Buyers should independently verify the current documents before booking.`
     },
     {
-      question: `What is the possession timeline for ${property.projectName}?`,
-      answer: `${property.projectName} has a possession timeline of ${property.possessionDate}.`
+      question: "What is the possession timeline?",
+      answer: `The current possession timeline is ${property.possessionDate}.`
     },
     {
       question: "Can I contact the developer directly?",
@@ -107,7 +105,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
             <span>/</span>
             <Link href="/buy" className="hover:text-primary">Buy</Link>
             <span>/</span>
-            <span className="text-foreground">{property.title}</span>
+            <span className="text-foreground">{publicTitle}</span>
           </div>
           <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
@@ -118,13 +116,13 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                 <Badge variant="accent">{property.status}</Badge>
                 <Badge variant="secondary">{property.propertyType}</Badge>
               </div>
-              <h1 className="mt-4 text-balance text-4xl font-bold sm:text-5xl">{property.title}</h1>
+              <h1 className="mt-4 text-balance text-4xl font-bold sm:text-5xl">{publicTitle}</h1>
               <p className="mt-3 flex flex-wrap items-center gap-2 text-muted-foreground">
                 <MapPin className="size-4" aria-hidden /> {property.location.address}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <PropertyActionButtons id={property.id} title={property.title} />
+              <PropertyActionButtons id={property.id} title="a verified BhoomiKonnect property" />
               <button className={cn(buttonVariants({ variant: "outline" }))} type="button">
                 <Share2 className="size-4" aria-hidden /> Share
               </button>
@@ -136,7 +134,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
       <section className="py-8">
         <div className="container grid gap-8 lg:grid-cols-[1fr_360px]">
           <div className="space-y-8">
-            <MediaGallery images={property.gallery} title={property.title} />
+            <MediaGallery images={property.gallery} title={publicTitle} />
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
@@ -158,7 +156,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
               <p className="mt-3 leading-7 text-muted-foreground">{property.description}</p>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {[
-                  ["Project name", property.projectName],
+                  ["Listing partner", "BhoomiKonnect"],
                   ["Sale/Rent", property.saleType],
                   ["Price", property.pricePerSqFt > 0 ? `₹${property.pricePerSqFt.toLocaleString("en-IN")} per sq.ft` : "Available on request"],
                   ["Booking amount", property.bookingAmount > 0 ? formatPrice(property.bookingAmount) : "Available on request"],
@@ -193,8 +191,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                   <p className="mt-1 text-sm text-muted-foreground">Review supplied plans, documents, pricing material and project video. Current terms remain subject to confirmation.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {property.videoUrl ? <a href="#project-video" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}><Video className="size-4" aria-hidden /> Video</a> : null}
-                  {property.brochureUrl ? <a href={property.brochureUrl} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}><Download className="size-4" aria-hidden /> Brochure / document</a> : null}
+                  <a href="#property-enquiry" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}><Download className="size-4" aria-hidden /> Request documents</a>
                 </div>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -205,30 +202,12 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                   </div>
                 ))}
               </div>
-              {property.documents?.length ? <div className="mt-5 flex flex-wrap gap-2">{property.documents.map((document) => <a key={document.url} href={document.url} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}><FileText className="size-4" aria-hidden /> {document.label}</a>)}</div> : null}
-              {property.videoUrl ? <video id="project-video" controls playsInline preload="metadata" className="mt-5 max-h-[680px] w-full scroll-mt-24 rounded-lg bg-black"><source src={property.videoUrl} type="video/mp4" /></video> : null}
+              <p className="mt-5 rounded-md border border-primary/15 bg-primary/5 p-4 text-sm leading-6 text-muted-foreground">Documents and walkthrough media are reviewed and shared by BhoomiKonnect on request, so third-party company branding and contact details remain private.</p>
             </Card>
 
             <Card className="p-5">
-              <h2 className="text-2xl font-bold">Developer Details</h2>
-              <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-start">
-                <div className="grid size-16 shrink-0 place-items-center rounded-md bg-primary text-xl font-bold text-white">
-                  {developer?.logoInitials}
-                </div>
-                <div className="flex-1">
-                  <Link href={`/developers/${developer?.slug}`} className="text-xl font-bold hover:text-primary">
-                    {developer?.name}
-                  </Link>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{developer?.profile}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Badge variant="secondary">
-                      <Star className="size-3 fill-current" aria-hidden /> {developer?.rating} rating
-                    </Badge>
-                    <Badge variant="outline">{developer?.completedProjects} completed projects</Badge>
-                    <Badge variant="outline">Established {developer?.established}</Badge>
-                  </div>
-                </div>
-              </div>
+              <h2 className="text-2xl font-bold">BhoomiKonnect listing support</h2>
+              <p className="mt-3 leading-7 text-muted-foreground">Our team coordinates current availability, pricing, approvals, documents and site visits directly. This keeps the property search simple and BhoomiKonnect as your single point of contact.</p>
             </Card>
 
             <div>
@@ -274,17 +253,17 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
 
       <div className="mobile-sticky-actions sticky bottom-0 z-30 grid grid-cols-3 gap-2 border-t bg-background p-2 lg:hidden">
         <a href={publicContactLinks.phone} className={cn(buttonVariants({ variant: "outline" }))}><Phone className="size-4" aria-hidden /> Call</a>
-        <a href={whatsappContactLink(`I am interested in ${property.title}`)} className={cn(buttonVariants({ variant: "secondary" }))}><MessageCircle className="size-4" aria-hidden /> WhatsApp</a>
+        <a href={whatsappContactLink("I am interested in a verified BhoomiKonnect property")} className={cn(buttonVariants({ variant: "secondary" }))}><MessageCircle className="size-4" aria-hidden /> WhatsApp</a>
         <a href="#property-enquiry" className={cn(buttonVariants())}>Enquire</a>
       </div>
 
       <JsonLd
         data={[
-          propertySchema(property, developer),
+          propertySchema(property),
           breadcrumbSchema([
             { name: "Home", url: "/" },
             { name: "Buy", url: "/buy" },
-            { name: property.title, url: `/property/${property.slug}` }
+            { name: publicTitle, url: `/property/${property.slug}` }
           ]),
           faqSchema(faqs)
         ]}

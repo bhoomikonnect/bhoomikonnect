@@ -1,11 +1,11 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, BadgeCheck, BedDouble, Building2, MapPin, Ruler, Star } from "lucide-react";
 import { PropertyActionButtons } from "@/components/properties/PropertyActionButtons";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { getDeveloperBySlug } from "@/lib/data";
+import { BrandSafeMedia } from "@/components/ui/BrandSafeMedia";
+import { publicListingProvider, publicPropertyTitle } from "@/lib/public-listing";
 import { cn, formatPrice } from "@/lib/utils";
 import type { Property } from "@/types/marketplace";
 
@@ -15,19 +15,16 @@ type PropertyCardProps = {
 };
 
 export function PropertyCard({ property, compact = false }: PropertyCardProps) {
-  const developer = getDeveloperBySlug(property.developerSlug);
-  const developerName = property.developerName || developer?.name || "Verified Developer";
+  const publicTitle = publicPropertyTitle(property);
 
   return (
     <Card className="group overflow-hidden transition hover:-translate-y-1 hover:shadow-lift">
       <Link href={`/property/${property.slug}`} className="block">
         <div className={cn("relative overflow-hidden", compact ? "aspect-[4/3]" : "aspect-[16/11]")}>
-          <Image
+          <BrandSafeMedia
             src={property.gallery[0]}
-            alt={`${property.title} property image`}
-            fill
+            alt={`${publicTitle} preview`}
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-            className="object-cover transition duration-500 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/5 to-transparent" />
           <div className="absolute left-3 top-3 flex flex-wrap gap-2">
@@ -55,7 +52,7 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <Link href={`/property/${property.slug}`} className="line-clamp-1 text-lg font-bold hover:text-primary">
-              {property.title}
+              {publicTitle}
             </Link>
             <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
               <MapPin className="size-4" aria-hidden /> {property.location.area}, {property.location.city}
@@ -83,12 +80,12 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
 
         <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
           <p className="line-clamp-1 text-sm text-muted-foreground">
-            by <span className="font-semibold text-foreground">{developerName}</span>
+            <span className="font-semibold text-foreground">{publicListingProvider}</span>
           </p>
           <span className="text-xs font-semibold text-primary">{property.approvals[0] || "Approval review"}</span>
         </div>
         <div className="mt-3 grid grid-cols-[auto_auto_auto_1fr] gap-2">
-          <PropertyActionButtons id={property.id} title={property.title} compact />
+          <PropertyActionButtons id={property.id} title="a verified BhoomiKonnect property" compact />
           <Link href={`/property/${property.slug}`} className={cn(buttonVariants({ variant: "default", size: "sm" }))}>View Details</Link>
         </div>
       </div>

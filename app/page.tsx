@@ -19,14 +19,12 @@ import {
 } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { QuoteForm } from "@/components/forms/QuoteForm";
-import { DeveloperCard } from "@/components/sections/DeveloperCard";
 import { RecentInteriorWork } from "@/components/sections/RecentInteriorWork";
 import { SectionHeading } from "@/components/sections/SectionHeading";
 import { FeaturedLaunches } from "@/components/sections/FeaturedLaunches";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { serviceFamilyMeta } from "@/lib/catalog";
-import { getDevelopers } from "@/lib/marketplace";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
@@ -98,8 +96,6 @@ const serviceFamilies = [
 ] as const;
 
 export default async function HomePage() {
-  const developers = await getDevelopers();
-
   return (
     <>
       <section className="relative overflow-hidden border-b">
@@ -183,23 +179,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {developers.length ? <section className="border-y bg-muted/50 py-10 sm:py-14">
-        <div className="container grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
-          <SectionHeading
-            eyebrow="Featured developers"
-            title="Profiles that make trust visible before the first call."
-            description="Developer pages include completed, ongoing, and upcoming projects, social links, reviews, specialties, and contact paths."
-          />
-          <div className="grid gap-4 md:grid-cols-2">
-            {developers.slice(0, 4).map((developer, index) => (
-              <Reveal key={developer.id} delay={index * 0.04}>
-                <DeveloperCard developer={developer} />
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section> : null}
 
       <section className="bg-[#fbfaf6] py-10 dark:bg-slate-950 sm:py-14">
         <div className="container">

@@ -8,6 +8,7 @@ import { featuredLaunches } from "@/lib/featured-launches";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { publicPropertyTitle } from "@/lib/public-listing";
 
 export function FeaturedLaunches({ compact = false }: { compact?: boolean }) {
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -31,7 +32,7 @@ export function FeaturedLaunches({ compact = false }: { compact?: boolean }) {
               Two growth corridors. One future-ready address.
             </h2>
             <p className="mt-4 max-w-2xl leading-7 text-emerald-50/75">
-              Discover Eeshanya&apos;s plotted communities across Rajapur and Mogiligidda, shaped around highway access, planned infrastructure and long-term growth.
+              Explore verified property opportunities across high-growth corridors, with BhoomiKonnect coordinating every enquiry and document request.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -45,6 +46,7 @@ export function FeaturedLaunches({ compact = false }: { compact?: boolean }) {
 
         <div ref={carouselRef} className={cn("scrollbar-none mt-9 grid snap-x snap-mandatory grid-flow-col gap-5 overflow-x-auto overscroll-x-contain pb-2", compact ? "auto-cols-[100%] md:auto-cols-[calc(50%-0.625rem)]" : "auto-cols-[88%] sm:auto-cols-[calc(50%-0.625rem)] lg:auto-cols-[calc(33.333%-0.875rem)]")}>
           {featuredLaunches.map((project, index) => {
+            const publicTitle = publicPropertyTitle(project);
             const samruddhi = index === 0;
             const stats = samruddhi
               ? [["100+", "Acres vision"], ["1,500+", "Planned plots"], ["150", "Sq.yd onwards"]]
@@ -52,15 +54,16 @@ export function FeaturedLaunches({ compact = false }: { compact?: boolean }) {
             return (
               <article key={project.id} className="group snap-start overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] shadow-2xl backdrop-blur-sm">
                 <Link href={`/property/${project.slug}`} className="relative block aspect-[16/10] overflow-hidden bg-white">
-                  <Image src={project.gallery[0]} alt={`${project.title} master layout`} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-contain p-2 transition duration-700 group-hover:scale-[1.03]" />
+                  <Image src={project.gallery[0]} alt={`${publicTitle} preview`} fill sizes="(min-width: 1024px) 50vw, 100vw" className="scale-110 object-cover blur-xl" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#071c17]/90 via-transparent to-transparent" />
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md border border-white/30 bg-slate-950/75 px-4 py-3 text-center shadow-lg backdrop-blur-md"><p className="font-bold">BhoomiKonnect</p><p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">Verified listing</p></div>
                   <div className="absolute left-4 top-4 flex flex-wrap gap-2">
                     <Badge variant="accent">New launch</Badge>
                     <Badge className="border-white/15 bg-[#0b5d4b]/90 text-white">{samruddhi ? "Proposed MUDA & RERA" : "HMDA & RERA approved"}</Badge>
                   </div>
                   <div className="absolute bottom-4 left-4 right-4">
                     <p className="flex items-center gap-2 text-sm text-emerald-50/80"><MapPin className="size-4 text-amber-300" /> {project.location.area}</p>
-                    <h3 className="mt-1 text-2xl font-bold sm:text-3xl">{project.title}</h3>
+                    <h3 className="mt-1 text-2xl font-bold sm:text-3xl">{publicTitle}</h3>
                   </div>
                 </Link>
                 <div className="p-5 sm:p-6">
@@ -74,8 +77,8 @@ export function FeaturedLaunches({ compact = false }: { compact?: boolean }) {
                     ).map((item) => <span key={item} className="flex items-center gap-2 text-sm text-emerald-50/80"><CheckCircle2 className="size-4 shrink-0 text-emerald-400" />{item}</span>)}
                   </div>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <Link href={`/property/${project.slug}`} className={cn(buttonVariants({ variant: "secondary" }), "rounded-full px-5")}>Explore project <ArrowUpRight className="size-4" /></Link>
-                    <a href={project.brochureUrl} target="_blank" className={cn(buttonVariants({ variant: "outline" }), "rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white")}><Ruler className="size-4" /> View master plan</a>
+                    <Link href={`/property/${project.slug}`} className={cn(buttonVariants({ variant: "secondary" }), "rounded-full px-5")}>Explore listing <ArrowUpRight className="size-4" /></Link>
+                    <Link href={`/property/${project.slug}#property-enquiry`} className={cn(buttonVariants({ variant: "outline" }), "rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white")}><Ruler className="size-4" /> Request plan</Link>
                     {!samruddhi && <span className="inline-flex items-center gap-1 text-xs text-emerald-200"><BadgeCheck className="size-4" /> RERA P02400009992</span>}
                   </div>
                 </div>

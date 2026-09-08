@@ -118,20 +118,20 @@ export function breadcrumbSchema(items: Array<{ name: string; url: string }>) {
   };
 }
 
-export function propertySchema(property: Property, developer?: Developer) {
+export function propertySchema(property: Property) {
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: property.title,
-    image: property.gallery.map((image) => absoluteUrl(image)),
+    image: [absoluteUrl(siteConfig.ogImage)],
     description: property.description,
-    brand: developer?.name,
+    brand: siteConfig.name,
     category: `${property.propertyType} ${property.category} Property`,
     sku: property.id,
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: property.rating,
-      reviewCount: developer?.reviews || 24
+      reviewCount: 24
     },
     offers: {
       "@type": "Offer",
@@ -141,7 +141,7 @@ export function propertySchema(property: Property, developer?: Developer) {
       url: absoluteUrl(`/property/${property.slug}`),
       seller: {
         "@type": "Organization",
-        name: developer?.name || siteConfig.name
+        name: siteConfig.name
       }
     },
     additionalProperty: [
