@@ -2,6 +2,13 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 export function isSupabaseAdminConfigured() {
+  // Local preview should use the bundled CMS/demo data unless a developer has
+  // explicitly opted into remote CMS access. This avoids noisy DNS/fetch
+  // failures when a copied Supabase URL is unavailable on the local network.
+  if (process.env.NODE_ENV !== "production" && process.env.ENABLE_REMOTE_CMS !== "true") {
+    return false;
+  }
+
   return Boolean((process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY));
 }
 
