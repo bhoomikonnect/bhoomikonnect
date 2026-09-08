@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { BrandSafeMedia } from "@/components/ui/BrandSafeMedia";
 import { publicListingProvider, publicPropertyTitle } from "@/lib/public-listing";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { Property } from "@/types/marketplace";
 
 type PropertyCardProps = {
@@ -38,8 +38,8 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
           </div>
           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
             <div className="rounded-md bg-white/92 px-3 py-2 text-slate-950 shadow-sm backdrop-blur">
-              <p className="text-xs font-semibold text-slate-500">Starting from</p>
-              <p className="text-lg font-bold">{property.price > 0 ? formatPrice(property.price) : "On request"}</p>
+              <p className="text-xs font-semibold text-slate-500">Current price</p>
+              <p className="text-lg font-bold">Contact BhoomiKonnect</p>
             </div>
             <span className="grid size-10 place-items-center rounded-md bg-primary text-white shadow-sm">
               <ArrowUpRight className="size-4" aria-hidden />

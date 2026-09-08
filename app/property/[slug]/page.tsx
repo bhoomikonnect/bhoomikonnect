@@ -26,11 +26,12 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MediaGallery } from "@/components/ui/MediaGallery";
+import { ContactActionLink } from "@/components/analytics/ContactActionLink";
 import { publicContactLinks, whatsappContactLink } from "@/lib/env";
 import { getProperties, getPropertyBySlug, getRelatedProperties } from "@/lib/marketplace";
 import { publicPropertyTitle } from "@/lib/public-listing";
 import { breadcrumbSchema, createMetadata, faqSchema, propertySchema } from "@/lib/seo";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { featuredLaunches } from "@/lib/featured-launches";
 
 type PropertyPageProps = {
@@ -138,7 +139,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { label: "Price", value: property.price > 0 ? formatPrice(property.price) : "On request", icon: IndianRupee },
+                { label: "Current price", value: "Contact BhoomiKonnect", icon: IndianRupee },
                 { label: "Area", value: property.area > 0 ? `${property.area} ${property.areaUnit}` : "On request", icon: Maximize2 },
                 { label: "Possession", value: property.possessionDate, icon: CalendarClock },
                 { label: "Parking", value: property.parking, icon: ParkingCircle }
@@ -158,8 +159,8 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                 {[
                   ["Listing partner", "BhoomiKonnect"],
                   ["Sale/Rent", property.saleType],
-                  ["Price", property.pricePerSqFt > 0 ? `₹${property.pricePerSqFt.toLocaleString("en-IN")} per sq.ft` : "Available on request"],
-                  ["Booking amount", property.bookingAmount > 0 ? formatPrice(property.bookingAmount) : "Available on request"],
+                  ["Price", "Shared on request"],
+                  ["Booking amount", "Shared on request"],
                   ["Facing", property.facing],
                   ["Road width", property.roadWidth],
                   ["Bedrooms", property.bedrooms ? `${property.bedrooms}` : "Flexible"],
@@ -238,8 +239,8 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
 
           <aside id="property-enquiry" className="scroll-mt-24 space-y-4 lg:sticky lg:top-24 lg:self-start">
             <Card className="p-5">
-              <p className="text-sm text-muted-foreground">Starting price</p>
-              <p className="mt-1 text-3xl font-bold">{property.price > 0 ? formatPrice(property.price) : "Price on request"}</p>
+              <p className="text-sm text-muted-foreground">Current price</p>
+              <p className="mt-1 text-3xl font-bold">Contact BhoomiKonnect</p>
               <p className="mt-2 text-sm text-muted-foreground">Contact us for current availability, pricing and site-visit slots.</p>
             </Card>
             <LeadForm
@@ -252,8 +253,8 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
       </section>
 
       <div className="mobile-sticky-actions sticky bottom-0 z-30 grid grid-cols-3 gap-2 border-t bg-background p-2 lg:hidden">
-        <a href={publicContactLinks.phone} className={cn(buttonVariants({ variant: "outline" }))}><Phone className="size-4" aria-hidden /> Call</a>
-        <a href={whatsappContactLink("I am interested in a verified BhoomiKonnect property")} className={cn(buttonVariants({ variant: "secondary" }))}><MessageCircle className="size-4" aria-hidden /> WhatsApp</a>
+        <ContactActionLink channel="call" source="Property mobile call button" propertySlug={property.slug} href={publicContactLinks.phone} className={cn(buttonVariants({ variant: "outline" }))}><Phone className="size-4" aria-hidden /> Call</ContactActionLink>
+        <ContactActionLink channel="whatsapp" source="Property mobile WhatsApp button" propertySlug={property.slug} href={whatsappContactLink("I am interested in a verified BhoomiKonnect property")} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "secondary" }))}><MessageCircle className="size-4" aria-hidden /> WhatsApp</ContactActionLink>
         <a href="#property-enquiry" className={cn(buttonVariants())}>Enquire</a>
       </div>
 

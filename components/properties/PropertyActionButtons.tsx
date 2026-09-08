@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { GitCompareArrows, Heart, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { whatsappContactLink } from "@/lib/env";
 import { cn } from "@/lib/utils";
+import { ContactActionLink } from "@/components/analytics/ContactActionLink";
 
 type Props = { id: string; title: string; compact?: boolean };
 const favoriteKey = "bk_property_favorites";
@@ -35,7 +35,7 @@ export function PropertyActionButtons({ id, title, compact = false }: Props) {
   return <div className="contents">
     <button type="button" onClick={toggleFavorite} className={cn(buttonVariants({ variant: favorite ? "default" : "outline", size: compact ? "icon" : "sm" }))} title={favorite ? "Remove saved property" : "Save property"} aria-pressed={favorite}><Heart className={`size-4 ${favorite ? "fill-current" : ""}`} aria-hidden />{compact ? null : favorite ? "Saved" : "Save"}</button>
     <button type="button" onClick={toggleCompare} className={cn(buttonVariants({ variant: compared ? "default" : "outline", size: compact ? "icon" : "sm" }))} title={compared ? "Remove from comparison" : "Compare property"} aria-pressed={compared}><GitCompareArrows className="size-4" aria-hidden />{compact ? null : compared ? "Compared" : "Compare"}</button>
-    {compact ? <Link href={whatsappContactLink(`I am interested in ${title}`)} target="_blank" className={cn(buttonVariants({ variant: "secondary", size: "icon" }))} title="WhatsApp"><MessageCircle className="size-4" aria-hidden /></Link> : null}
+    {compact ? <ContactActionLink channel="whatsapp" source="Property card WhatsApp button" href={whatsappContactLink(`I am interested in ${title}`)} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "secondary", size: "icon" }))} title="WhatsApp"><MessageCircle className="size-4" aria-hidden /></ContactActionLink> : null}
     {notice ? <span className="sr-only" role="status">{notice}</span> : null}
   </div>;
 }

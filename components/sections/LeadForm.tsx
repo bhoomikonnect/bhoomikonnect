@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { publicContactLinks } from "@/lib/env";
+import { ContactActionLink } from "@/components/analytics/ContactActionLink";
 
 type LeadFormProps = {
   title?: string;
@@ -107,12 +108,12 @@ export function LeadForm({
         <Button type="submit" name="leadAction" value={source} className="col-span-2" disabled={status === "loading"}>
           <Send className="size-4" aria-hidden /> Send enquiry
         </Button>
-        <a href={publicContactLinks.phone} className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md border bg-background px-3 text-sm font-semibold">
+        <ContactActionLink channel="call" source="Property enquiry form call button" propertySlug={propertySlug} href={publicContactLinks.phone} className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md border bg-background px-3 text-sm font-semibold">
           <PhoneCall className="size-4" aria-hidden /> Call
-        </a>
-        <a href={publicContactLinks.whatsapp} className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-secondary px-3 text-sm font-semibold text-white">
+        </ContactActionLink>
+        <ContactActionLink channel="whatsapp" source="Property enquiry form WhatsApp button" propertySlug={propertySlug} href={publicContactLinks.whatsapp} target="_blank" rel="noreferrer" className="focus-ring inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-secondary px-3 text-sm font-semibold text-white">
           <MessageCircle className="size-4" aria-hidden /> WhatsApp
-        </a>
+        </ContactActionLink>
         <Button type="submit" name="leadAction" value="Book Site Visit" variant="accent" className="col-span-2" disabled={status === "loading"}>
           <CalendarCheck className="size-4" aria-hidden /> Book site visit
         </Button>

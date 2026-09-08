@@ -1,12 +1,12 @@
 import type { MetadataRoute } from "next";
-import { getDevelopers, getProperties } from "@/lib/marketplace";
+import { getProperties } from "@/lib/marketplace";
 import { getMaterials, getServiceProviders, getServices } from "@/lib/content";
 import { getPublishedCmsPages } from "@/lib/cms-repository";
 import { siteConfig, staticRoutes } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [properties, developers, services, providers, materials, pages] = await Promise.all([
-    getProperties(), getDevelopers(), getServices(), getServiceProviders(), getMaterials(), getPublishedCmsPages()
+  const [properties, services, providers, materials, pages] = await Promise.all([
+    getProperties(), getServices(), getServiceProviders(), getMaterials(), getPublishedCmsPages()
   ]);
   const now = new Date();
 
@@ -17,12 +17,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "weekly" as const,
       priority: property.featuredProperty ? 0.9 : 0.75
-    })),
-    ...developers.map((developer) => ({
-      url: `${siteConfig.url}/developers/${developer.slug}`,
-      lastModified: now,
-      changeFrequency: "weekly" as const,
-      priority: 0.7
     })),
     ...services.map((service) => ({ url: `${siteConfig.url}/${service.family}/${service.slug}`, lastModified: now, changeFrequency: "monthly" as const, priority: service.featured ? 0.8 : 0.65 })),
     ...providers.map((provider) => ({ url: `${siteConfig.url}/service-providers/${provider.slug}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 })),

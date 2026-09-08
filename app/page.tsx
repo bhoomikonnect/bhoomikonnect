@@ -32,7 +32,7 @@ export const metadata: Metadata = createMetadata({
   description:
     "Buy, sell, build, design, renovate, maintain, and source construction materials through verified BhoomiKonnect professionals.",
   path: "/",
-  keywords: ["real estate marketplace", "verified developers", "RERA properties", "buy property India"]
+  keywords: ["Hyderabad real estate", "property for sale Hyderabad", "verified property listings", "RERA properties", "BhoomiKonnect"]
 });
 
 const categoryCards = [

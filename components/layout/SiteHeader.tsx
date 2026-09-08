@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { LayoutDashboard, MessageCircle, PhoneCall, UserRound } from "lucide-react";
 import { DesktopServicesMenu } from "@/components/layout/DesktopServicesMenu";
+import { ContactActionLink } from "@/components/analytics/ContactActionLink";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { buttonVariants } from "@/components/ui/button";
@@ -47,7 +48,9 @@ export function SiteHeader() {
             <Link href="/admin" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2")}>
               <LayoutDashboard className="size-4" aria-hidden /> Admin
             </Link>
-            <a
+            <ContactActionLink
+              channel="call"
+              source="Header call button"
               href="tel:+919063242304"
               className="group hidden whitespace-nowrap items-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-3 py-1.5 text-sm font-bold text-primary transition hover:border-primary/45 hover:bg-primary/10 xl:inline-flex"
               aria-label={`Call BhoomiKonnect at ${siteConfig.phone}`}
@@ -56,8 +59,10 @@ export function SiteHeader() {
                 <PhoneCall className="size-3.5" aria-hidden />
               </span>
               <span>Call {siteConfig.phone}</span>
-            </a>
-            <a
+            </ContactActionLink>
+            <ContactActionLink
+              channel="whatsapp"
+              source="Header WhatsApp button"
               href="https://wa.me/919063242304?text=Hello%20BhoomiKonnect%2C%20I%20would%20like%20to%20know%20more."
               target="_blank"
               rel="noreferrer"
@@ -66,12 +71,14 @@ export function SiteHeader() {
               title="Chat on WhatsApp"
             >
               <MessageCircle className="size-5" aria-hidden />
-            </a>
+            </ContactActionLink>
             <Link href="/contact?type=free-quote" className={cn(buttonVariants({ variant: "default", size: "sm" }))}>
               Get Free Quote
             </Link>
           </div>
-          <a
+          <ContactActionLink
+            channel="whatsapp"
+            source="Mobile header WhatsApp button"
             href="https://wa.me/919063242304?text=Hello%20BhoomiKonnect%2C%20I%20would%20like%20to%20know%20more."
             target="_blank"
             rel="noreferrer"
@@ -79,7 +86,7 @@ export function SiteHeader() {
             aria-label="Chat with BhoomiKonnect on WhatsApp"
           >
             <MessageCircle className="size-4" aria-hidden />
-          </a>
+          </ContactActionLink>
           <MobileNav />
         </div>
       </div>

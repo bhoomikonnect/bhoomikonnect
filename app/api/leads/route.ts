@@ -44,8 +44,21 @@ export async function POST(request: Request) {
     const leadPayload = Object.fromEntries(
       Object.entries(parsed.data).filter(([key]) => key !== "website")
     ) as Omit<typeof parsed.data, "website">;
-    const lead = await createLead(leadPayload);
-    const delivery = await sendLeadNotifications(leadPayload, lead.id);
+    const isContactClick = leadPayload.leadType === "Call Click" || leadPayload.leadType === "WhatsApp Click";
+    const forwardedIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    const visitorIp = forwardedIp || request.headers.get("x-real-ip")?.trim() || (forwardedFor === "local" ? "local" : "unavailable");
+    const enrichedPayload = isContactClick
+      ? {
+          ...leadPayload,
+          metadata: {
+            ...leadPayload.metadata,
+            visitorIp,
+            userAgent: request.headers.get("user-agent") || "Unavailable"
+          }
+        }
+      : leadPayload;
+    const lead = await createLead(enrichedPayload);
+    const delivery = await sendLeadNotifications(enrichedPayload, lead.id);
     await updateLeadDelivery(lead.id, delivery);
     delivery.errors.forEach((error) => console.error(`Lead notification: ${error}`));
 

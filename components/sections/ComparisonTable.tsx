@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { getProperties } from "@/lib/marketplace";
-import { formatPrice } from "@/lib/utils";
 
 export async function ComparisonTable() {
   const properties = await getProperties();
@@ -18,7 +17,7 @@ export async function ComparisonTable() {
         ))}
         {[
           ["Type", ...items.map((item) => item.propertyType)],
-          ["Starting price", ...items.map((item) => formatPrice(item.price))],
+          ["Current price", ...items.map(() => "Contact BhoomiKonnect")],
           ["Area", ...items.map((item) => `${item.area} ${item.areaUnit}`)],
           ["Possession", ...items.map((item) => item.possessionDate)],
           ["RERA", ...items.map((item) => item.reraNumber)]

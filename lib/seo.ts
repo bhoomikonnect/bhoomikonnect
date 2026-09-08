@@ -135,7 +135,6 @@ export function propertySchema(property: Property) {
     },
     offers: {
       "@type": "Offer",
-      price: property.price,
       priceCurrency: "INR",
       availability: "https://schema.org/InStock",
       url: absoluteUrl(`/property/${property.slug}`),

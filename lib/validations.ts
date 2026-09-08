@@ -10,7 +10,7 @@ export const leadSchema = z.object({
   leadType: z.enum([
     "Property Enquiry", "Property Sale Request", "Callback Request", "Site Visit", "Brochure Download",
     "Developer Enquiry", "Construction Quote", "Architecture Enquiry", "Interior Enquiry", "Painting Enquiry",
-    "Renovation Enquiry", "Maintenance Booking", "Material Quote", "Service Booking", "General Contact"
+    "Renovation Enquiry", "Maintenance Booking", "Material Quote", "Service Booking", "General Contact", "Call Click", "WhatsApp Click"
   ]).default("General Contact"),
   propertySlug: z.string().optional(),
   developerSlug: z.string().optional(),
