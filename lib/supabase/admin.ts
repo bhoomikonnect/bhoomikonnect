@@ -2,6 +2,12 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 export function isSupabaseAdminConfigured() {
+  // Static generation must be deterministic and must not depend on an
+  // external CMS hostname. Runtime requests can still use Supabase normally.
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return false;
+  }
+
   // Local preview should use the bundled CMS/demo data unless a developer has
   // explicitly opted into remote CMS access. This avoids noisy DNS/fetch
   // failures when a copied Supabase URL is unavailable on the local network.
