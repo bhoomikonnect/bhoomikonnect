@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, CheckCircle2, MapPin, Ruler, Sparkles } from "lucide-react";
 import { useRef } from "react";
@@ -9,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { publicPropertyTitle } from "@/lib/public-listing";
+import { BrandSafeMedia } from "@/components/ui/BrandSafeMedia";
 
 export function FeaturedLaunches({ compact = false }: { compact?: boolean }) {
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -54,9 +54,8 @@ export function FeaturedLaunches({ compact = false }: { compact?: boolean }) {
             return (
               <article key={project.id} className="group snap-start overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] shadow-2xl backdrop-blur-sm">
                 <Link href={`/property/${project.slug}`} className="relative block aspect-[16/10] overflow-hidden bg-white">
-                  <Image src={project.gallery[0]} alt={`${publicTitle} preview`} fill sizes="(min-width: 1024px) 50vw, 100vw" className="scale-110 object-cover blur-xl" />
+                  <BrandSafeMedia src={project.gallery[0]} alt={`${publicTitle} preview`} sizes="(min-width: 1024px) 50vw, 100vw" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#071c17]/90 via-transparent to-transparent" />
-                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md border border-white/30 bg-slate-950/75 px-4 py-3 text-center shadow-lg backdrop-blur-md"><p className="font-bold">BhoomiKonnect</p><p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">Verified listing</p></div>
                   <div className="absolute left-4 top-4 flex flex-wrap gap-2">
                     <Badge variant="accent">New launch</Badge>
                     <Badge className="border-white/15 bg-[#0b5d4b]/90 text-white">{samruddhi ? "Proposed MUDA & RERA" : "HMDA & RERA approved"}</Badge>

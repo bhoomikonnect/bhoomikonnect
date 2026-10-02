@@ -37,8 +37,8 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
             {property.featuredProperty ? <Badge variant="secondary">Featured</Badge> : null}
           </div>
           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
-            <div className="rounded-md bg-white/92 px-3 py-2 text-slate-950 shadow-sm backdrop-blur">
-              <p className="text-xs font-semibold text-slate-500">Current price</p>
+            <div className="rounded-md bg-primary/95 px-3 py-2 text-primary-foreground shadow-sm backdrop-blur">
+              <p className="text-xs font-semibold text-primary-foreground/75">Current price</p>
               <p className="text-lg font-bold">Contact BhoomiKonnect</p>
             </div>
             <span className="grid size-10 place-items-center rounded-md bg-primary text-white shadow-sm">

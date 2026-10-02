@@ -9,7 +9,7 @@ export const siteConfig = {
   ogImage: "/images/bhoomikonnect-hero.png",
   phone: "+91 90632 42304",
   whatsapp: "+91 90632 42304",
-  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "",
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "bhoomikonnect@gmail.com",
   address: process.env.NEXT_PUBLIC_OFFICE_ADDRESS || "",
   socials: {
     linkedin: process.env.NEXT_PUBLIC_LINKEDIN_URL || "",

@@ -39,7 +39,7 @@ export default function ContactPage() {
               <Card key={item.label} className="p-5">
                 <item.icon className="size-5 text-primary" aria-hidden />
                 <p className="mt-4 text-sm text-muted-foreground">{item.label}</p>
-                <p className="font-bold">{item.value}</p>
+                {item.label === "Email" ? <a href={`mailto:${item.value}`} className="font-bold text-foreground underline decoration-primary/60 underline-offset-4 hover:decoration-primary">{item.value}</a> : <p className="font-bold">{item.value}</p>}
               </Card>
             ))}
             <Card className="p-5">

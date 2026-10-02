@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutDashboard, MessageCircle, PhoneCall, UserRound } from "lucide-react";
+import { Mail, MessageCircle, PhoneCall, UserRound } from "lucide-react";
 import { DesktopServicesMenu } from "@/components/layout/DesktopServicesMenu";
 import { ContactActionLink } from "@/components/analytics/ContactActionLink";
 import { MobileNav } from "@/components/layout/MobileNav";
@@ -45,9 +45,9 @@ export function SiteHeader() {
             <Link href="/login" className={cn(buttonVariants({ variant: "ghost", size: "icon" }))} aria-label="Login" title="Login">
               <UserRound className="size-4" aria-hidden />
             </Link>
-            <Link href="/admin" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2")}>
-              <LayoutDashboard className="size-4" aria-hidden /> Admin
-            </Link>
+            <a href={`mailto:${siteConfig.email}`} className={cn(buttonVariants({ variant: "outline", size: "icon" }))} aria-label={`Email BhoomiKonnect at ${siteConfig.email}`} title={`Email ${siteConfig.email}`}>
+              <Mail className="size-4" aria-hidden />
+            </a>
             <ContactActionLink
               channel="call"
               source="Header call button"
